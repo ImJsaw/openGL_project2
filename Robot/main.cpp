@@ -326,6 +326,7 @@ void init() {
 
 	mariocontrollerID = glGetUniformLocation(programs, "mario_controller");
 	timeID = glGetUniformLocation(programs, "time");
+	offsetID = glGetUniformLocation(programs, "offset");
 	deepxID = glGetUniformLocation(programs, "deepx");
 	deepyID = glGetUniformLocation(programs, "deepy");
 	isLeftID = glGetUniformLocation(programs, "isLeft");
