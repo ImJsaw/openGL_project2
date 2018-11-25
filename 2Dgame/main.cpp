@@ -11,11 +11,11 @@ int main(int argc, char** argv){
 	//multisample for golygons smooth
 	glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH|GLUT_MULTISAMPLE);
 	glutInitWindowSize(800, 600);
-	glutCreateWindow("OpenGL 4.3 - Robot");
+	glutCreateWindow("OpenGL 4.3 - 2D Game - LF2");
 
 	glewExperimental = GL_TRUE; //置於glewInit()之前
 	if (glewInit()) {
-		std::cerr << "Unable to initialize GLEW ... exiting" << std::endl;//c error
+		cerr << "Unable to initialize GLEW ... exiting" << endl;//c error
 		exit(EXIT_FAILURE);
 	}
 
@@ -26,11 +26,10 @@ int main(int argc, char** argv){
 	glutTimerFunc(jump_interval, Jump_Timer, 0);
 	glutKeyboardFunc(Keyboard);
 	glutKeyboardUpFunc(Keyboardup);
-
+	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 	glutMainLoop();
 	return 0;
 }
-
 
 void ChangeSize(int w,int h){
 	if(h == 0) h = 1;
@@ -38,12 +37,10 @@ void ChangeSize(int w,int h){
 	Projection = perspective(80.0f,(float)w/h,0.1f,100.0f);
 }
 
-void Deep_Timer(int val)
-{
+void Deep_Timer(int val){
 	glutPostRedisplay();
 	glutTimerFunc(deep_interval, Deep_Timer, val);
 	deepTime += deep_interval * deepSpeed * 0.001;
-	
 	
 	if (deepImage == 2) { // 火焰攻擊
 		if (isLeft == 0) {
@@ -83,9 +80,7 @@ void Deep_Timer(int val)
 		else if(deepx != 10){ // deepx 往右走
 			deepx++;
 		}
-		
 	}
-	
 }
 
 void Jump_Timer(int val) {
@@ -94,7 +89,6 @@ void Jump_Timer(int val) {
 	glutTimerFunc(jump_interval, Jump_Timer, val);
 	currentTime += jump_interval * 0.001; 
 	// jump_interval 為 30 時，最接近正常每秒的速度
-
 	if (deepController == 3 || deepController == 7) { // 跳起到著地的時間
 		if ((currentTime - deltatime) >= time_for_a_jump) { // 要著地了，看向哪一方
 			deltatime = 0.0f;
@@ -117,46 +111,12 @@ void Jump_Timer(int val) {
 				offset = translate(-jump_interval * 0.001, 0, 0) * offset;
 			}
 			offset = translate(0, cos( radian )*0.05, 0) * offset; // 跳躍的矩陣
-			
 		}
 	}
-	// 左上右下分別考慮，停下來deepDirection是-1；左右方向用isLeft，右0左1
-	else if (deepDirection == 0) {
-		offset = translate(-jump_interval * 0.001, 0, 0) * offset;
-		if (deepx == 8) {
-			deepx = 1;
-		}
-		else {
-			deepx++;
-		}
-		printf("%d\n", deepx);
-	}
-	else if (deepDirection == 2) {
-		offset = translate(jump_interval * 0.001, 0, 0) * offset;
-		if (deepx == 8) {
-			deepx = 1;
-		}
-		else {
-			deepx++;
-		}
-	}
-	else if (deepDirection == 1) {
-		offset = translate(0, jump_interval * 0.001, 0) * offset;
-		if (deepx == 8) {
-			deepx = 1;
-		}
-		else {
-			deepx++;
-		}
-	}
-	else if (deepDirection == 3) {
-		offset = translate(0, -jump_interval * 0.001, 0) * offset;
-		if (deepx == 8) {
-			deepx = 1;
-		}
-		else {
-			deepx++;
-		}
+	else if(deepDirection != -1){//normal move
+		offset = translate(jump_interval * 0.001* xMove, jump_interval * 0.001* yMove, 0) * offset;
+		deepx++;
+		if (deepx == 8) deepx = 1;
 	}
 }
 
@@ -196,13 +156,16 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'W': // 往上走
 	case 'w':
 		deepDirection = 1;
+		yMove++;
 		break;
 	case 'S': // 往下走
 	case 's':
 		deepDirection = 3;
+		yMove--;
 		break;
 	case 'a':
 	case 'A': // 往左走
+		xMove--;
 		if (deepController == 7) { // 上一個時刻向左跳
 			deepController = 7; // 仍然向左
 			is_move_when_jump = 2; // 邊跳邊向左移動
@@ -219,6 +182,7 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 		break;
 	case 'd':
 	case 'D':
+		xMove++;
 		if (deepController == 7) { // 上一個時刻向左跳
 			deepController = 3; // 改成向右
 			is_move_when_jump = 1; // 邊跳邊向右移動
@@ -241,18 +205,21 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 		
 		case 'W': // 往上走
 		case 'w':
-			deepDirection = -1;
+			yMove--;
+			if(!xMove) deepDirection = -1;
 			deepx = 1; // 回到站立
 			deepy = 1;
 			break;
 		case 'S': // 往下走
 		case 's':
-			deepDirection = -1;
+			yMove++;
+			if (!xMove) deepDirection = -1;
 			deepx = 1; // 回到站立
 			deepy = 1;
 			break;
 		case 'a':
 		case 'A':
+			xMove++;
 			if (deepController == 7) { // 上一個時刻向左跳
 				deepController = 7; // 仍然向左
 				is_move_when_jump = 0;
@@ -266,11 +233,12 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 				deepx = 1; // 回到站立
 				deepy = 1;
 			}
-			deepDirection = -1;
+			if (!yMove) deepDirection = -1;
 			
 			break;
 		case 'd':
 		case 'D':
+			xMove--;
 			if (deepController == 7) { // 上一個時刻向左跳
 				deepController = 3; // 改成向右
 				is_move_when_jump = 0;
@@ -284,18 +252,19 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 				deepx = 1; // 回到站立
 				deepy = 1;
 			}
-			deepDirection = -1;
+			if (!yMove) deepDirection = -1;
 			break;
 	}
 	glutPostRedisplay();
 }
 
 void init() {
-
 	deepController = 0; // 向右站立
 	offset = scale(1, 1, 1); // 初始化矩陣
 	deepx = 1; // 貼圖座標移動矩陣
 	deepy = 1;
+	xMove = 0;
+	yMove = 0;
 
 	is_move_when_jump = 0;
 
@@ -303,11 +272,11 @@ void init() {
 	deepDirection = -1; 
 	deepImage = 0;
 
-	ShaderInfo shadersky[] = {
+	ShaderInfo deepShader[] = {
 		{ GL_VERTEX_SHADER, "deep.vp" },//vertex shader
 	{ GL_FRAGMENT_SHADER, "deep.fp" },//fragment shader
 	{ GL_NONE, NULL } };
-	programs = LoadShaders(shadersky);//讀取shader
+	programs = LoadShaders(deepShader);//讀取shader
 
 	glUseProgram(programs);//uniform參數數值前必須先use shader
 
@@ -342,7 +311,6 @@ void init() {
 	deep_0 = loadTexture("sys/deep_0.png");
 	deep_1 = loadTexture("sys/deep_1.png");
 	deep_2 = loadTexture("sys/deep_2.png");
-
 	
 	glUniform1i(glGetUniformLocation(programs, "deep_0"), 0);
 	glUniform1i(glGetUniformLocation(programs, "deep_1"), 1);
@@ -355,7 +323,6 @@ void init() {
 	deepyID = glGetUniformLocation(programs, "deepy");
 	isLeftID = glGetUniformLocation(programs, "isLeft");
 	deepImageID = glGetUniformLocation(programs, "deepImage");
-
 }
 
 void display() {
@@ -386,7 +353,6 @@ void display() {
 	glutSwapBuffers();//調換前台和後台buffer ,當後臺buffer畫完和前台buffer交換使我們看見它
 }
 
-// ---------------------------------------------------
 unsigned int loadTexture(char const * path)
 {
 	unsigned int textureID;
@@ -424,45 +390,6 @@ unsigned int loadTexture(char const * path)
 		std::cout << "Texture failed to load at path: " << path << std::endl;
 		stbi_image_free(data);
 	}
-
-	return textureID;
-}
-
-// loads a cubemap texture from 6 individual texture faces
-// order:
-// +X (right)
-// -X (left)
-// +Y (top)
-// -Y (bottom)
-// +Z (front) 
-// -Z (back)
-// -------------------------------------------------------
-unsigned int loadCubemap(vector<std::string> faces)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	int width, height, nrChannels;
-	for (unsigned int i = 0; i < faces.size(); i++)
-	{
-		unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			stbi_image_free(data);
-		}
-		else
-		{
-			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-			stbi_image_free(data);
-		}
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	return textureID;
 }

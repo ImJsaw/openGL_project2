@@ -12,7 +12,7 @@
 #include <map>
 #include <string>
 
-#include <GL/glew.h>
+#include <include/GL/glew.h>
 
 #include "texture.h"
 #include "shader.h"

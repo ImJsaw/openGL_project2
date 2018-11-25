@@ -9,10 +9,9 @@ using namespace std;
 
 #include "vgl.h"
 #include "LoadShaders.h"
-#include "objloader.hpp"
 // Include GLM
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <include/glm/glm.hpp>
+#include <include/glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -185,6 +184,7 @@ GLuint cubemapTexture;
 
 //int mode;
 int action;
+int xMove, yMove;
 
 #define DOR(angle) (angle*3.1415/180);
 
