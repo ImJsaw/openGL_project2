@@ -326,7 +326,7 @@ void init() {
 
 	mariocontrollerID = glGetUniformLocation(programs, "mario_controller");
 	timeID = glGetUniformLocation(programs, "time");
-	offsetID = glGetUniformLocation(programs, "offset");
+	offsetID = glGetUniformLocation(programs, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
 	deepxID = glGetUniformLocation(programs, "deepx");
 	deepyID = glGetUniformLocation(programs, "deepy");
 	isLeftID = glGetUniformLocation(programs, "isLeft");
