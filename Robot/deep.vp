@@ -1,0 +1,47 @@
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
+layout (location = 3) in vec2 aTexCoord2;
+
+out vec3 ourColor;
+out vec2 TexCoord;
+
+flat out int mariocontroller;
+uniform int mario_controller;
+
+uniform mat4 offset;
+
+uniform int deepx; 
+uniform int deepy;
+
+uniform int isLeft; // 0:right 1:left
+uniform int deepImage; // 0, 1, 2 
+flat out int deepImg;
+
+void main()
+{
+	gl_Position = offset * vec4(aPos, 1.0);
+	ourColor = aColor;
+	if(deepImage == 0){ // 走路圖的texcoord
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord.x + (deepx-1) * 0.1, aTexCoord.y - (deepy-1) * 1.0 / 7 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord.x + (10-deepx) * 0.1), aTexCoord.y - (deepy-1) * 1.0 / 7 );
+
+		}
+	}
+	else if(deepImage == 2){ // 攻擊圖的texcoord，改用aTexCoord2，y的部分減1/4
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord2.x + (deepx-1) * 0.1, aTexCoord2.y - (deepy-1) * 1.0 / 4 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord2.x + (10-deepx) * 0.1), aTexCoord2.y - (deepy-1) * 1.0 / 4 );
+		}
+	}
+	
+	
+	mariocontroller = mario_controller;
+	deepImg = deepImage;
+}

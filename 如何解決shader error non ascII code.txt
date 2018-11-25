@@ -1,0 +1,5 @@
+I will give Notepad++ as an example since it's what I use to edit GLSL:
+
+Open the GLSL file.
+Encoding -> Convert to ANSI. (Note that merely hitting "Encode in ANSI" will not strip the characters)
+Save the file.
