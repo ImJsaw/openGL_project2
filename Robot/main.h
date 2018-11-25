@@ -19,25 +19,12 @@ using namespace glm;
 #include "stb_image.h"
 
 
-
-#define PARTSNUM 18
-#define BODY 0
-#define LEFTSHOUDER 1
-#define ULEFTARM 2
-#define DLEFTARM 3
-#define LEFTHAND 4
-
-void updateModels();
-
 void init();
-void init2();
 
 void ChangeSize(int w,int h);
 void display();
-void display2();
 void Keyboard(unsigned char key, int x, int y);
 void Keyboardup(unsigned char key, int x, int y);
-void Mouse(int button,int state,int x,int y);
 
 void	Deep_Timer(int val);
 float	deep_interval = 40;
@@ -51,29 +38,13 @@ float	deltatime = 0.0f;
 float	time_for_a_jump = 1.2f;
 int is_move_when_jump; // 0 為 非，1 為 向右，2 為 向左
 
-void menuEvents(int option);
-void ActionMenuEvents(int option);
-void ModeMenuEvents(int option);
-void ShaderMenuEvents(int option);
-
-void idle(int dummy);
-
 mat4 translate(float x,float y,float z);
 mat4 scale(float x,float y,float z);
 mat4 rotate(float angle,float x,float y,float z);
 
-void Obj2Buffer();
-void load2Buffer( char* obj,int);
-
-void updateObj3(int); // new added gangnam function
-void updateObj2(int); // new added dance function
-void updateObj(int);
-void resetObj(int);
-
 //the function for the skybox
 unsigned int loadTexture(char const * path);
 unsigned int loadCubemap(vector<std::string> faces);
-
 
 
 bool isFrame;
@@ -86,14 +57,8 @@ GLuint uVBO;
 GLuint nVBO;
 GLuint mVBO;
 GLuint UBO;
-GLuint VBOs[PARTSNUM];
-GLuint uVBOs[PARTSNUM];
-GLuint nVBOs[PARTSNUM];
-unsigned int skyboxVAO, skyboxVBO; // this set is for skybox
-unsigned int quadVAO, quadVBO; // 給framebuffer的螢幕面
 GLuint program;
 unsigned int programs; // this program is for skybox
-unsigned int programf;// 製作後製特效的shader-program
 int pNo;
 int mode;
 GLuint modeID;
@@ -199,13 +164,7 @@ float quadVertices[] = { // vertex attributes for a quad that fills the entire s
 	1.0f, -1.0f,  1.0f, 0.0f,
 	1.0f,  1.0f,  1.0f, 1.0f
 };
-unsigned int framebuffer; // 這三個buffer是要做整張畫面的特效使用
-unsigned int textureColorbuffer;
-unsigned int rbo;
 
-float yangles[PARTSNUM]; // new add for 手臂旋轉
-float zangles[PARTSNUM]; // new add for 手臂左右平舉
-float angles[PARTSNUM];
 float position = 0.0;
 float angle = 0.0;
 float eyeAngley = 0.0;
@@ -216,33 +175,14 @@ GLint MatricesIdx;
 GLuint ModelID;
 GLuint ViewPosID;// new added
 
-int vertices_size[PARTSNUM];
-int uvs_size[PARTSNUM];
-int normals_size[PARTSNUM];
-int materialCount[PARTSNUM];
-
-std::vector<std::string> mtls[PARTSNUM];//use material
-std::vector<unsigned int> faces[PARTSNUM];//face count
-map<string,vec3> KDs;//mtl-name&Kd
-map<string,vec3> KSs;//mtl-name&Ks
 
 mat4 Projection;
 mat4 View;
 mat4 Model;
-mat4 Models[PARTSNUM];
-
 GLuint ProjectionskyID; // this both matrix(矩陣) ID is for loading into skybox
 GLuint ViewskyID;
 GLuint cubemapTexture;
 
-#define leftHand 0
-#define rightHand 1
-#define leftFoot 2
-#define rightFoot 3
-#define GANGNAM 3 // new add gangnam keyword
-#define DANCE 2 // new add dance keyword
-#define WALK 1
-#define IDLE 0
 //int mode;
 int action;
 
