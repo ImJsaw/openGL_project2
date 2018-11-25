@@ -45,7 +45,7 @@ void Deep_Timer(int val)
 	deepTime += deep_interval * deepSpeed * 0.001;
 	
 	
-	if (deepImage == 2) { 
+	if (deepImage == 2) { // 火焰攻擊
 		if (isLeft == 0) {
 			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
 		}
@@ -67,6 +67,25 @@ void Deep_Timer(int val)
 			deepx--;
 		}	
 	}
+	else if (deepImage == 1) { // 一般攻擊
+		if (isLeft == 0) {
+			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+		}
+		else if (isLeft == 1) {
+			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+		}
+
+		if (deepx == 10) {
+			deepImage = 0; // 換回圖片0
+			deepx = 1; // 回到靜止圖
+			deepy = 1;
+		}
+		else if(deepx != 10){ // deepx 往右走
+			deepx++;
+		}
+		
+	}
+	
 }
 
 void Jump_Timer(int val) {
@@ -143,9 +162,14 @@ void Jump_Timer(int val) {
 
 //  deepController : 跳7,走65,站4:左   右:0站,12走,3跳
 // deepDirection : 0左 1上 2右 3下
-void Keyboard(unsigned char key, int x, int y) {
+void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	switch (key) {
-	case 'x': // 攻擊狀態
+	case 'z': // 一般攻擊狀態
+	case 'Z':
+		deepImage = 1;
+		deepy = 4;
+		break;
+	case 'x': // 火焰攻擊狀態
 	case 'X':
 		deepImage = 2;
 		break;
@@ -212,7 +236,7 @@ void Keyboard(unsigned char key, int x, int y) {
 	}
 	glutPostRedisplay();
 }
-void Keyboardup(unsigned char key, int x, int y) {
+void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 	switch (key) {
 		
 		case 'W': // 往上走

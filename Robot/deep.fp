@@ -28,5 +28,11 @@ void main()
 		}
 		FragColor = texture(deep_2, TexCoord);
 	}
+	else if(deepImg == 1){
+		if(texture(deep_1, TexCoord).a < 0.1){
+			discard;
+		}
+		FragColor = texture(deep_1, TexCoord);
+	}
 	
 }

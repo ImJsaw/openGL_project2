@@ -27,7 +27,7 @@ void Keyboard(unsigned char key, int x, int y);
 void Keyboardup(unsigned char key, int x, int y);
 
 void	Deep_Timer(int val);
-float	deep_interval = 40;
+float	deep_interval = 60;
 float	deepTime = 0.0f;
 double	deepSpeed = 1.0f;
 

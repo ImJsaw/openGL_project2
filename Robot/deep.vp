@@ -40,6 +40,14 @@ void main()
 			TexCoord = vec2( 1.0 - (aTexCoord2.x + (10-deepx) * 0.1), aTexCoord2.y - (deepy-1) * 1.0 / 4 );
 		}
 	}
+	else if(deepImage == 1){
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord.x + (deepx-1) * 0.1, aTexCoord.y - (deepy-1) * 1.0 / 7 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord.x + (10-deepx) * 0.1), aTexCoord.y - (deepy-1) * 1.0 / 7 );
+		}
+	}
 	
 	
 	mariocontroller = mario_controller;
