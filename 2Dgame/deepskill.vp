@@ -1,0 +1,51 @@
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
+//layout (location = 3) in vec2 aTexCoord2;
+
+out vec3 ourColor;
+out vec2 TexCoord;
+
+uniform mat4 offset;
+
+uniform int skillx; 
+uniform int skilly;
+
+uniform int isLeft; // 0:right 1:left
+uniform int skillImage; // 0, 1, 2 
+flat out int skillImg;
+
+void main()
+{
+	gl_Position = offset * vec4(aPos, 1.0);
+	ourColor = aColor;
+
+	if(skillImage == 0){ // ¦B¤õ¤M¼vªºtexcoord
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord.x + (skillx-1) * 0.25, aTexCoord.y - (skilly-1) * 1.0 / 2 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord.x + (4-skillx) * 0.25), aTexCoord.y - (skilly-1) * 1.0 / 2 );
+
+		}
+	}
+	else if(skillImage == 1){ // 
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord.x + (skillx-1) * 0.25, aTexCoord.y - (skilly-1) * 1.0 / 5 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord.x + (4-skillx) * 0.25), aTexCoord.y - (skilly-1) * 1.0 / 5 );
+		}
+	}
+	else if(skillImage == 2){ // 
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord.x + (skillx-1) * 0.25, aTexCoord.y - (skilly-1) * 1.0 / 5 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord.x + (4-skillx) * 0.25), aTexCoord.y - (skilly-1) * 1.0 / 5 );
+		}
+	}
+	
+	skillImg = skillImage;
+}

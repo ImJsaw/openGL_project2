@@ -49,36 +49,52 @@ unsigned int loadCubemap(vector<std::string> faces);
 bool isFrame;
 GLint isMotionSwitch; // 轉換動作時藉此讓他先設為0，不會讓動作轉換時繼承上一秒的動作
 
-GLuint VAO;
+GLuint VAO; // for deep
 GLuint VBO;
 GLuint EBO;
-GLuint uVBO;
-GLuint nVBO;
-GLuint mVBO;
-GLuint UBO;
-GLuint program;
-unsigned int programs; // this program is for skybox
+
+GLuint VAOskill;
+GLuint VBOskill;
+GLuint EBOskill;
+
+
+
+
+unsigned int programDeep; // deep-program
+unsigned int programSkill; // deep-program
 int pNo;
 int mode;
 GLuint modeID;
 GLuint timeID;
-GLuint CubemapID;
-GLuint pNoID;
-GLuint lenID;
-int frametimeID;
-int channel0ID;
-int channel1ID;
-int texturechar[8];
-int textureback;
+
+//-----------------------
+// deep-shader ID 位址
+//-----------------------
 GLuint deepController;
-GLuint mariocontrollerID;
+GLuint deepcontrollerID;
 GLuint offsetID;
 GLuint deepxID;
 GLuint deepyID;
 GLuint isLeftID;
 GLuint deepImageID;
 
-mat4 offset; // 馬力歐移動
+//-----------------------
+// deep-shader ID 位址
+//-----------------------
+//GLuint deepController;
+//GLuint mariocontrollerID;
+GLuint offsetSkillID;
+GLuint skillxID;
+GLuint skillyID;
+GLuint isLeftSkillID;
+GLuint skillImageID;
+
+
+
+//-----------------------
+// deep-variables
+//-----------------------
+mat4 offset; // deep移動
 int deepx; // 移動貼圖座標
 int deepy; // 移動貼圖座標
 int deep_0; // 圖片1
@@ -88,71 +104,49 @@ int isLeft; // 是不是左邊
 int deepDirection; // 左上右下
 int deepImage;
 
+//-----------------------
+// skill-variables
+//-----------------------
+
+mat4 offsetSkill;
+int skillx;
+int skilly;
+int twinsflame; // 冰火刀流圖片
+int skillImage;
+int drawSkill;
+
 // it is for deep
 float deepVertices[] = {
 	// positions          // colors           // texture coords for img 0/1
-	0.08f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,  0.1f, 1.0f,      
-	0.08f, -0.1f, 0.0f,   0.0f, 1.0f, 0.0f,   0.1f, 0.87f,    
-	-0.08f, -0.1f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.87f,   
-	-0.08f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f   
+	-0.84f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,  0.1f, 1.0f,      
+	-0.84f, -0.1f, 0.0f,   0.0f, 1.0f, 0.0f,   0.1f, 0.87f,    
+	-1.0f, -0.1f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.87f,   
+	-1.0f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f   
 };
-float deepTexCoord2[] = {
+float deepTexCoord2[] = { // deep的第二張圖座標不同
 	0.1f, 1.0f,// top right
 	0.1f, 0.75f,// bottom right
 	0.0f, 0.75f,// bottom left
 	0.0f, 1.0f// top left
 };
-
-//it is for deep too
 unsigned int deepIndices[] = {
 	0, 1, 3, // first triangle
 	1, 2, 3  // second triangle
 };
 
-float skyboxVertices[] = {
-	// positions          
-	-1.0f,  1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-
-	-1.0f, -1.0f,  1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f,  1.0f,
-	-1.0f, -1.0f,  1.0f,
-
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-
-	-1.0f, -1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f, -1.0f,  1.0f,
-	-1.0f, -1.0f,  1.0f,
-
-	-1.0f,  1.0f, -1.0f,
-	1.0f,  1.0f, -1.0f,
-	1.0f,  1.0f,  1.0f,
-	1.0f,  1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	-1.0f,  1.0f, -1.0f,
-
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f,  1.0f,
-	1.0f, -1.0f, -1.0f,
-	1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f,  1.0f,
-	1.0f, -1.0f,  1.0f
+float skillVertices[] = {
+	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
+	-0.68f,  0.08f, 0.0f,   1.0f, 0.0f, 0.0f,   0.25f, 1.0f,
+	-0.68f, -0.08f, 0.0f,   0.0f, 1.0f, 0.0f,   0.25f, 0.5f,
+	-0.84f, -0.08f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.5f,
+	-0.84f,  0.08f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
+unsigned int skillIndices[] = {
+	0, 1, 3, // first triangle
+	1, 2, 3  // second triangle
+};
+
+
 float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// positions   // texCoords
 	-1.0f,  1.0f,  0.0f, 1.0f,

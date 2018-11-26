@@ -43,12 +43,18 @@ void Deep_Timer(int val){
 	deepTime += deep_interval * deepSpeed * 0.001;
 	
 	if (deepImage == 2) { // 火焰攻擊
+
+		// 移動圖片deep
 		if (isLeft == 0) {
 			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+			offsetSkill = translate(deep_interval * 0.001, 0, 0) * offsetSkill;
 		}
 		else if (isLeft == 1) {
 			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+			offsetSkill = translate(-deep_interval * 0.001, 0, 0) * offsetSkill;
 		}
+
+		// deep連續圖動畫
 		if (deepx == 1 && deepy == 4) {
 			deepImage = 0; // 換回圖片0
 			deepx = 1; // 回到靜止圖
@@ -62,7 +68,9 @@ void Deep_Timer(int val){
 		}
 		else if ((deepy == 2 && deepx != 1) || (deepy == 4 && deepx != 1)) { // deepx 往左走
 			deepx--;
-		}	
+		}
+
+		
 	}
 	else if (deepImage == 1) { // 一般攻擊
 		if (isLeft == 0) {
@@ -80,6 +88,33 @@ void Deep_Timer(int val){
 		else if(deepx != 10){ // deepx 往右走
 			deepx++;
 		}
+	}
+
+	if (drawSkill == 1 && skillImage == 0) { 
+		// 移動兩張圖片，skill和deep
+		if (isLeft == 0) {
+			
+			offsetSkill = translate(deep_interval * 0.0001, 0, 0) * offsetSkill;
+		}
+		else if (isLeft == 1) {
+			
+			offsetSkill = translate(-deep_interval * 0.0001, 0, 0) * offsetSkill;
+		}
+
+		// skill 連續圖動畫
+		if (skillx == 4 && skilly == 2) {
+			skillx = 1; // 回到靜止圖
+			skilly = 1;
+			drawSkill = 0;
+		}
+		else if ((skilly == 1 && skillx != 4) || (skilly == 2 && skillx != 4)) {
+			skillx++;
+		}
+		else if (skilly == 1 && skillx == 4) {
+			skilly++;
+			skillx = 1;
+		}
+
 	}
 }
 
@@ -118,6 +153,7 @@ void Jump_Timer(int val) {
 		deepx++;
 		if (deepx == 8) deepx = 1;
 	}
+
 }
 
 //  deepController : 跳7,走65,站4:左   右:0站,12走,3跳
@@ -132,6 +168,9 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'x': // 火焰攻擊狀態
 	case 'X':
 		deepImage = 2;
+		skillImage = 0;
+		offsetSkill = offset;
+		drawSkill = 1;
 		break;
 	case 'c': // 跳躍
 	case 'C':
@@ -259,6 +298,10 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 }
 
 void init() {
+
+	//-----------------------
+	// deep-setting
+	//-----------------------
 	deepController = 0; // 向右站立
 	offset = scale(1, 1, 1); // 初始化矩陣
 	deepx = 1; // 貼圖座標移動矩陣
@@ -276,9 +319,9 @@ void init() {
 		{ GL_VERTEX_SHADER, "deep.vp" },//vertex shader
 	{ GL_FRAGMENT_SHADER, "deep.fp" },//fragment shader
 	{ GL_NONE, NULL } };
-	programs = LoadShaders(deepShader);//讀取shader
+	programDeep = LoadShaders(deepShader);//讀取shader
 
-	glUseProgram(programs);//uniform參數數值前必須先use shader
+	glUseProgram(programDeep);//uniform參數數值前必須先use shader
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -306,30 +349,103 @@ void init() {
 	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(32 * sizeof(float)));
 	glEnableVertexAttribArray(3);
 
-	glUseProgram(programs);
+	glUseProgram(programDeep);
 	
 	deep_0 = loadTexture("sys/deep_0.png");
 	deep_1 = loadTexture("sys/deep_1.png");
 	deep_2 = loadTexture("sys/deep_2.png");
 	
-	glUniform1i(glGetUniformLocation(programs, "deep_0"), 0);
-	glUniform1i(glGetUniformLocation(programs, "deep_1"), 1);
-	glUniform1i(glGetUniformLocation(programs, "deep_2"), 2);
+	glUniform1i(glGetUniformLocation(programDeep, "deep_0"), 0);
+	glUniform1i(glGetUniformLocation(programDeep, "deep_1"), 1);
+	glUniform1i(glGetUniformLocation(programDeep, "deep_2"), 2);
 
-	mariocontrollerID = glGetUniformLocation(programs, "mario_controller");
-	timeID = glGetUniformLocation(programs, "time");
-	offsetID = glGetUniformLocation(programs, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
-	deepxID = glGetUniformLocation(programs, "deepx");
-	deepyID = glGetUniformLocation(programs, "deepy");
-	isLeftID = glGetUniformLocation(programs, "isLeft");
-	deepImageID = glGetUniformLocation(programs, "deepImage");
+	deepcontrollerID = glGetUniformLocation(programDeep, "mario_controller");
+	timeID = glGetUniformLocation(programDeep, "time");
+	offsetID = glGetUniformLocation(programDeep, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
+	deepxID = glGetUniformLocation(programDeep, "deepx");
+	deepyID = glGetUniformLocation(programDeep, "deepy");
+	isLeftID = glGetUniformLocation(programDeep, "isLeft");
+	deepImageID = glGetUniformLocation(programDeep, "deepImage");
+
+	//-----------------------
+	// skill-setting
+	//-----------------------
+	offsetSkill = scale(1,1,1);
+	skillx = 1;
+	skilly = 1;
+	skillImage = 0;
+	drawSkill = 0;
+
+	ShaderInfo skillShader[] = {
+		{ GL_VERTEX_SHADER, "deepskill.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "deepskill.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programSkill = LoadShaders(skillShader);//讀取shader
+
+	glUseProgram(programSkill);//uniform參數數值前必須先use shader
+
+	glGenVertexArrays(1, &VAOskill);
+	glGenBuffers(1, &VBOskill);
+	glGenBuffers(1, &EBOskill);
+
+	glBindVertexArray(VAOskill);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOskill);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skillVertices), skillVertices, GL_STATIC_DRAW);
+	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(deepVertices), sizeof(deepTexCoord2), deepTexCoord2);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOskill);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(deepIndices), deepIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	// texture coord attribute(for image-刀流)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glUseProgram(programSkill);
+
+	twinsflame = loadTexture("sys/twinsflame.png");
+	//deep_1 = loadTexture("sys/deep_1.png");
+	//deep_2 = loadTexture("sys/deep_2.png");
+
+	glUniform1i(glGetUniformLocation(programSkill, "deep_0"), 0);
+	//glUniform1i(glGetUniformLocation(programs, "deep_1"), 1);
+	//glUniform1i(glGetUniformLocation(programs, "deep_2"), 2);
+
+	
+	offsetSkillID = glGetUniformLocation(programSkill, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
+	skillxID = glGetUniformLocation(programSkill, "skillx");
+	skillyID = glGetUniformLocation(programSkill, "skilly");
+	isLeftSkillID = glGetUniformLocation(programSkill, "isLeft");
+	skillImageID = glGetUniformLocation(programSkill, "skillImage");
 }
 
 void display() {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glUniform1i(mariocontrollerID, deepController);
+	
+
+	
+	
+	
+	
+	
+	
+	//-----------------------
+	// deep-draw
+	//-----------------------
+	glUseProgram(programDeep); // 記得要useprogram 和 vao，不然東西會綁到上一個skillProgram中
+	glBindVertexArray(VAO);
+
+	glUniform1i(deepcontrollerID, deepController);
 	glUniform1f(timeID, deepTime);
 	glUniformMatrix4fv(offsetID, 1, false, &offset[0][0]);
 	glUniform1i(deepxID, deepx);
@@ -337,7 +453,7 @@ void display() {
 	glUniform1i(isLeftID, isLeft);
 	glUniform1i(deepImageID, deepImage);
 	// bind textures on corresponding texture units
-	
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, deep_0);
 	glActiveTexture(GL_TEXTURE1);
@@ -345,9 +461,36 @@ void display() {
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, deep_2);
 	// render container
-	glUseProgram(programs);
+	glUseProgram(programDeep);
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	
+	//-----------------------
+	// skill-setting
+	//-----------------------
+	// 在deep之後畫skill，skill才能跟deep一起移動
+	glUseProgram(programSkill);
+	glBindVertexArray(VAOskill);
+	glUniformMatrix4fv(offsetSkillID, 1, false, &offsetSkill[0][0]);
+	glUniform1i(skillxID, skillx);
+	glUniform1i(skillyID, skilly);
+	glUniform1i(isLeftSkillID, isLeft);
+	glUniform1i(skillImageID, skillImage);
+	// bind textures on corresponding texture units
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, twinsflame);
+	/*glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, deep_1);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, deep_2);*/
+	// render container
+	glUseProgram(programSkill);
+	glBindVertexArray(VAOskill);
+	if (drawSkill == 1) {
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+	
 
 	glFlush();//強制執行上次的OpenGL commands
 	glutSwapBuffers();//調換前台和後台buffer ,當後臺buffer畫完和前台buffer交換使我們看見它
