@@ -72,7 +72,7 @@ void Deep_Timer(int val){
 
 		
 	}
-	else if (deepImage == 1) { // 一般攻擊
+	else if (deepImage == 1 && deepy == 4) { // 一般攻擊(在連續圖的第四行)
 		if (isLeft == 0) {
 			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
 		}
@@ -89,9 +89,27 @@ void Deep_Timer(int val){
 			deepx++;
 		}
 	}
+	else if (deepImage == 1 && deepy == 2) { // 丟東西(圖片1的第二行)
+		if (isLeft == 0) {
+			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+		}
+		else if (isLeft == 1) {
+			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+		}
 
-	if (drawSkill == 1 && skillImage == 0) { 
-		// 移動兩張圖片，skill和deep
+		if (deepx == 8) {
+			deepImage = 0; // 換回圖片0
+			deepx = 1; // 回到靜止圖
+			deepy = 1;
+		}
+		else if (deepx != 10) { // deepx 往右走
+			deepx++;
+		}
+	}
+
+
+	if (drawSkill == 1 && skillImage == 0) { // 冰火劍氣播放連續圖
+		// 龍向前位移
 		if (isLeft == 0) {
 			
 			offsetSkill = translate(deep_interval * 0.0001, 0, 0) * offsetSkill;
@@ -115,6 +133,51 @@ void Deep_Timer(int val){
 			skillx = 1;
 		}
 
+	}
+
+	else if (drawSkill == 1 && skillImage == 1) { // 紅龍播放連續圖
+		
+		if (isLeft == 0) {
+
+			offsetSkill = translate(deep_interval * 0.002, 0, 0) * offsetSkill;
+		}
+		else if (isLeft == 1) {
+
+			offsetSkill = translate(-deep_interval * 0.002, 0, 0) * offsetSkill;
+		}
+
+		// skill 連續圖動畫
+		if (skillx == 2 && skilly == 5) {
+			skillx = 1; // 回到靜止圖
+			skilly = 1;
+			drawSkill = 0;
+		}
+		else if (skillx != 2) { // x : 1 -> 2
+			skillx++;
+		}
+		else if (skillx == 2) { // y : 1 -> 2 ； x : 1 
+			skilly++;
+			skillx = 1;
+		}
+	}
+
+	else if (drawSkill == 1 && skillImage == 2) { // 朱利安柱子連續圖
+		if (isLeft) offsetSkill = translate(-0.2, 0, 0) * offset;
+		else offsetSkill = translate(-0.2, 0, 0) * offset;
+
+		// skill 連續圖動畫
+		if (skillx == 4 && skilly == 2) {
+			skillx = 1; // 回到靜止圖
+			skilly = 1;
+			drawSkill = 0;
+		}
+		else if (skillx != 4) { // x : 1 -> 2
+			skillx++;
+		}
+		else if (skillx == 4) { // y : 1 -> 2 ； x : 1 
+			skilly++;
+			skillx = 1;
+		}
 	}
 }
 
@@ -160,12 +223,28 @@ void Jump_Timer(int val) {
 // deepDirection : 0左 1上 2右 3下
 void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	switch (key) {
-	case 'z': // 一般攻擊狀態
+	case 'e':
+	case 'E':
+		deepImage = 1;
+		deepy = 2;
+		skillImage = 2; // 朱利安柱子圖片
+		if (isLeft) offsetSkill = translate(-0.2, 0, 0) * offset;
+		else offsetSkill = translate(-0.2, 0, 0) * offset;
+		deltatime = currentTime;
+		drawSkill = 1;
+		break;
+	case 'z': // 一般攻擊狀態，飛龍特效啟動
 	case 'Z':
 		deepImage = 1;
 		deepy = 4;
+
+		skillImage = 1; // 劍氣圖片
+		if (isLeft) offsetSkill = translate(-0.35, 0, 0) * offset;
+		else offsetSkill = translate(-0.1, 0, 0) * offset;
+		drawSkill = 1;
+
 		break;
-	case 'x': // 火焰攻擊狀態
+	case 'x': // 火焰攻擊狀態，劍氣特效啟動
 	case 'X':
 		deepImage = 2;
 		skillImage = 0;
@@ -385,6 +464,54 @@ void init() {
 
 	glUseProgram(programSkill);//uniform參數數值前必須先use shader
 
+	
+
+	//---------------------------------
+	//dragon instance initialize(五個龍的位置offset)
+	//---------------------------------
+	int index = 0;
+	for (int y = -2; y <= 2; y++)
+	{
+		glm::vec2 translation;
+		translation.x = abs(y * 0.1);
+		translation.y = y * 0.1;
+		dragonOffset[index++] = translation;
+	}
+	// --------------------------------------
+	// store instance data in an array buffer(一次生成五龍，該VBO放置算好的偏差值)
+	// --------------------------------------
+	unsigned int instanceVBO;
+	glGenBuffers(1, &instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 5, &dragonOffset[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//---------------------------------
+	//dragon instance initialize(五個柱子的位置offset)
+	//---------------------------------
+	int index2 = 0;
+	for (int x = -6; x <= 6; x+=3)
+	{
+		glm::vec2 translation;
+		translation.x = x * 0.1;
+		translation.y = 0;
+		columnOffset[index2++] = translation;
+	}
+	// --------------------------------------
+	// store instance data in an array buffer(一次生成五龍，該VBO放置算好的偏差值)
+	// --------------------------------------
+	unsigned int instanceVBO2;
+	glGenBuffers(1, &instanceVBO2);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 5, &columnOffset[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
+
+	// --------------------------------------
+	// normal VAO VBO EBO
+	// --------------------------------------
 	glGenVertexArrays(1, &VAOskill);
 	glGenBuffers(1, &VBOskill);
 	glGenBuffers(1, &EBOskill);
@@ -392,12 +519,19 @@ void init() {
 	glBindVertexArray(VAOskill);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBOskill);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skillVertices), skillVertices, GL_STATIC_DRAW);
-	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(deepVertices), sizeof(deepTexCoord2), deepTexCoord2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skillVertices)+sizeof(skillVertices2), skillVertices, GL_STATIC_DRAW); // A+B的空間中先綁定A
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(skillVertices), sizeof(skillVertices2), skillVertices2); // 再綁定B，才不會圖片有問題
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOskill);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(deepIndices), deepIndices, GL_STATIC_DRAW);
 
+	
+
+
+
+	//---------------------------------
+	//sword-light
+	//---------------------------------
 	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -410,14 +544,47 @@ void init() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
+
+	
+	//---------------------------------
+	//dragon-fly
+	//---------------------------------
+	// position aattribute(dragon is longer than sword-light)
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(32 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+
+	// texture coord attribute(for image-dragon)
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(35 * sizeof(float)));
+	glEnableVertexAttribArray(4);
+
+	// 五個龍的偏差值，另外傳入(因為使用的是不同的VBO)
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO); // this attribute comes from a different vertex buffer
+	glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0); // 從instanceVBO傳入的
+	glEnableVertexAttribArray(5);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribDivisor(5, 1); // tell OpenGL this is an instanced vertex attribute.
+	//(index of attribpointer, update/indice)
+
+	// 五個朱利安柱子的偏差值，另外傳入(因為使用的是不同的VBO)
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO2); // this attribute comes from a different vertex buffer
+	glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0); // 從instanceVBO傳入的
+	glEnableVertexAttribArray(6);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribDivisor(6, 1); // tell OpenGL this is an instanced vertex attribute.
+	//(index of attribpointer, update/indice)
+
+
 	glUseProgram(programSkill);
 
 	twinsflame = loadTexture("sys/twinsflame.png");
+	firedragon = loadTexture("sys/fire_dragon.png");
+	juliancolumn = loadTexture("sys/julianColumn.png");
 	//deep_1 = loadTexture("sys/deep_1.png");
 	//deep_2 = loadTexture("sys/deep_2.png");
 
-	glUniform1i(glGetUniformLocation(programSkill, "deep_0"), 0);
-	//glUniform1i(glGetUniformLocation(programs, "deep_1"), 1);
+	glUniform1i(glGetUniformLocation(programSkill, "twinsflame"), 0);
+	glUniform1i(glGetUniformLocation(programSkill, "firedragon"), 1);
+	glUniform1i(glGetUniformLocation(programSkill, "julianColumn"), 2);
 	//glUniform1i(glGetUniformLocation(programs, "deep_2"), 2);
 
 	
@@ -426,6 +593,8 @@ void init() {
 	skillyID = glGetUniformLocation(programSkill, "skilly");
 	isLeftSkillID = glGetUniformLocation(programSkill, "isLeft");
 	skillImageID = glGetUniformLocation(programSkill, "skillImage");
+	skillTimeID = glGetUniformLocation(programSkill, "time");
+
 }
 
 void display() {
@@ -433,7 +602,49 @@ void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	
+	//-----------------------
+	// skill-setting
+	//-----------------------
+	// 在deep之後畫skill，skill才能跟deep一起移動
+	glUseProgram(programSkill);
+	glBindVertexArray(VAOskill);
+	glUniformMatrix4fv(offsetSkillID, 1, false, &offsetSkill[0][0]);
+	glUniform1i(skillxID, skillx);
+	glUniform1i(skillyID, skilly);
+	glUniform1i(isLeftSkillID, isLeft);
+	glUniform1i(skillImageID, skillImage);
+	glUniform1f(skillTimeID, currentTime - deltatime);
+	// bind textures on corresponding texture units
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, twinsflame);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, firedragon);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, juliancolumn);
+
+	/*glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, deep_2);*/
+	// render container
+	glUseProgram(programSkill);
+	glBindVertexArray(VAOskill);
+
+
+	if (drawSkill == 1) {
+		if (skillImage == 0) {
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		}
+		else if (skillImage == 1) {
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 5);
+			glBindVertexArray(0);
+		}
+		else if (skillImage == 2) {
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 5);
+			glBindVertexArray(0);
+		}
+	}
+	
+		
 	
 	
 	
@@ -466,31 +677,6 @@ void display() {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	
-	//-----------------------
-	// skill-setting
-	//-----------------------
-	// 在deep之後畫skill，skill才能跟deep一起移動
-	glUseProgram(programSkill);
-	glBindVertexArray(VAOskill);
-	glUniformMatrix4fv(offsetSkillID, 1, false, &offsetSkill[0][0]);
-	glUniform1i(skillxID, skillx);
-	glUniform1i(skillyID, skilly);
-	glUniform1i(isLeftSkillID, isLeft);
-	glUniform1i(skillImageID, skillImage);
-	// bind textures on corresponding texture units
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, twinsflame);
-	/*glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, deep_1);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, deep_2);*/
-	// render container
-	glUseProgram(programSkill);
-	glBindVertexArray(VAOskill);
-	if (drawSkill == 1) {
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	}
 	
 
 	glFlush();//強制執行上次的OpenGL commands

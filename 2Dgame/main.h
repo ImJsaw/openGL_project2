@@ -79,7 +79,7 @@ GLuint isLeftID;
 GLuint deepImageID;
 
 //-----------------------
-// deep-shader ID 位址
+// skill-shader ID 位址
 //-----------------------
 //GLuint deepController;
 //GLuint mariocontrollerID;
@@ -88,7 +88,7 @@ GLuint skillxID;
 GLuint skillyID;
 GLuint isLeftSkillID;
 GLuint skillImageID;
-
+GLuint skillTimeID;
 
 
 //-----------------------
@@ -112,6 +112,10 @@ mat4 offsetSkill;
 int skillx;
 int skilly;
 int twinsflame; // 冰火刀流圖片
+int firedragon; // 紅龍在飛
+int juliancolumn; // 紫色柱子
+glm::vec2 dragonOffset[5];
+glm::vec2 columnOffset[5];
 int skillImage;
 int drawSkill;
 
@@ -141,10 +145,19 @@ float skillVertices[] = {
 	-0.84f, -0.08f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.5f,
 	-0.84f,  0.08f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
+float skillVertices2[] = { // 飛龍
+	-0.48f,  0.1f, 0.0f,     0.5f, 1.0f, // up-right
+	-0.48f, -0.1f, 0.0f,     0.5f, 0.8f, // down-right
+	-0.88f, -0.1f, 0.0f,     0.0f, 0.8f,  // down-left
+	-0.88f,  0.1f, 0.0f,     0.0f, 1.0f   // up-left
+};
+
+
 unsigned int skillIndices[] = {
 	0, 1, 3, // first triangle
 	1, 2, 3  // second triangle
 };
+
 
 
 float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
