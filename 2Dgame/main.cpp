@@ -169,7 +169,8 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'X':
 		deepImage = 2;
 		skillImage = 0;
-		offsetSkill = offset;
+		if(isLeft) offsetSkill = translate(-0.2, 0, 0) * offset;
+		else offsetSkill = translate(-0.1, 0, 0) * offset;
 		drawSkill = 1;
 		break;
 	case 'c': // 跳躍
