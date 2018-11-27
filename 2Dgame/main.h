@@ -184,10 +184,10 @@ float skillVertices[] = {
 	-0.08f,  0.08f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
 float skillVertices2[] = { // ­¸Às
-	0.4f,  0.1f, 0.0f,     0.5f, 1.0f, // up-right
-	0.4f, -0.1f, 0.0f,     0.5f, 0.8f, // down-right
-	-0.4f, -0.1f, 0.0f,     0.0f, 0.8f,  // down-left
-	-0.4f,  0.1f, 0.0f,     0.0f, 1.0f   // up-left
+	0.4f,  0.15f, 0.0f,     0.5f, 1.0f, // up-right
+	0.4f, -0.15f, 0.0f,     0.5f, 0.8f, // down-right
+	-0.4f, -0.15f, 0.0f,     0.0f, 0.8f,  // down-left
+	-0.4f,  0.15f, 0.0f,     0.0f, 1.0f   // up-left
 };
 unsigned int skillIndices[] = {
 	0, 1, 3, // first triangle
@@ -213,11 +213,11 @@ unsigned int deepBloodIndices[] = {
 // background-variables
 //-----------------------
 float backVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-	// positions   // texCoords
-	 1.0f,  1.0f, 0.0f,  1.0f, 1.0f,   // up-right
-	 1.0f, -1.0f, 0.0f,  1.0f, 0.0f, // bottom-right
-	-1.0f, -1.0f, 0.0f,  0.0f, 0.0f, //bottom-left
-	-1.0f,  1.0f, 0.0f,  0.0f, 1.0f, //up-left 
+	// positions                            // texCoords
+	 1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.4f, 1.0f,   // up-right
+	 1.0f, -1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // bottom-right
+	-1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.5f, 0.0f, //bottom-left
+	-1.0f,  1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f, //up-left 
 };
 unsigned int backIndices[] = {
 	0, 1, 3, // first triangle
