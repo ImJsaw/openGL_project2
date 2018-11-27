@@ -24,6 +24,8 @@ void ChangeSize(int w,int h);
 void display();
 void Keyboard(unsigned char key, int x, int y);
 void Keyboardup(unsigned char key, int x, int y);
+void Keyboard2(unsigned char key, int x, int y);
+void Keyboardup2(unsigned char key, int x, int y);
 
 void	Deep_Timer(int val);
 float	deep_interval = 60;
@@ -49,6 +51,7 @@ unsigned int loadCubemap(vector<std::string> faces);
 bool isFrame;
 GLint isMotionSwitch; // 轉換動作時藉此讓他先設為0，不會讓動作轉換時繼承上一秒的動作
 
+
 GLuint VAO; // for deep
 GLuint VBO;
 GLuint EBO;
@@ -57,11 +60,20 @@ GLuint VAOskill;
 GLuint VBOskill;
 GLuint EBOskill;
 
+GLuint VAOdb;
+GLuint VBOdb;
+GLuint EBOdb;
 
-
+GLuint VAOb;
+GLuint VBOb;
+GLuint EBOb;
 
 unsigned int programDeep; // deep-program
 unsigned int programSkill; // deep-program
+unsigned int programDeepBlood;
+unsigned int programBack;
+
+
 int pNo;
 int mode;
 GLuint modeID;
@@ -81,14 +93,23 @@ GLuint deepImageID;
 //-----------------------
 // skill-shader ID 位址
 //-----------------------
-//GLuint deepController;
-//GLuint mariocontrollerID;
 GLuint offsetSkillID;
 GLuint skillxID;
 GLuint skillyID;
 GLuint isLeftSkillID;
 GLuint skillImageID;
 GLuint skillTimeID;
+
+//-----------------------
+// deepBlood-shader ID 位址
+//-----------------------
+GLuint offsetDeepBloodID;
+GLuint offsetDeepBloodLengthID;
+
+//-----------------------
+// backGround-shader ID 位址
+//-----------------------
+
 
 
 //-----------------------
@@ -119,13 +140,27 @@ glm::vec2 columnOffset[5];
 int skillImage;
 int drawSkill;
 
-// it is for deep
+//-----------------------
+// deep-blood-variables
+//-----------------------
+int deepBloodImg; // 血條圖片
+mat4 offsetDeepBlood; // 血條矩陣，跟隨deep
+float offsetDeepBloodLength; // 扣血
+
+//-----------------------
+// background-variables
+//-----------------------
+int backgroundImg;
+
+//-----------------------
+// deep-vertices
+//-----------------------
 float deepVertices[] = {
 	// positions          // colors           // texture coords for img 0/1
-	-0.84f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,  0.1f, 1.0f,      
-	-0.84f, -0.1f, 0.0f,   0.0f, 1.0f, 0.0f,   0.1f, 0.87f,    
-	-1.0f, -0.1f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.87f,   
-	-1.0f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f   
+	0.08f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,  0.1f, 1.0f,      
+	0.08f, -0.1f, 0.0f,   0.0f, 1.0f, 0.0f,   0.1f, 0.87f,    
+	-0.08, -0.1f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.87f,   
+	-0.08f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f   
 };
 float deepTexCoord2[] = { // deep的第二張圖座標不同
 	0.1f, 1.0f,// top right
@@ -138,37 +173,55 @@ unsigned int deepIndices[] = {
 	1, 2, 3  // second triangle
 };
 
+//-----------------------
+// skill-vertices
+//-----------------------
 float skillVertices[] = {
 	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
-	-0.68f,  0.08f, 0.0f,   1.0f, 0.0f, 0.0f,   0.25f, 1.0f,
-	-0.68f, -0.08f, 0.0f,   0.0f, 1.0f, 0.0f,   0.25f, 0.5f,
-	-0.84f, -0.08f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.5f,
-	-0.84f,  0.08f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+	0.08f,  0.08f, 0.0f,   1.0f, 0.0f, 0.0f,   0.25f, 1.0f,
+	0.08f, -0.08f, 0.0f,   0.0f, 1.0f, 0.0f,   0.25f, 0.5f,
+	-0.08f, -0.08f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.5f,
+	-0.08f,  0.08f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
 float skillVertices2[] = { // 飛龍
-	-0.48f,  0.1f, 0.0f,     0.5f, 1.0f, // up-right
-	-0.48f, -0.1f, 0.0f,     0.5f, 0.8f, // down-right
-	-0.88f, -0.1f, 0.0f,     0.0f, 0.8f,  // down-left
-	-0.88f,  0.1f, 0.0f,     0.0f, 1.0f   // up-left
+	0.4f,  0.1f, 0.0f,     0.5f, 1.0f, // up-right
+	0.4f, -0.1f, 0.0f,     0.5f, 0.8f, // down-right
+	-0.4f, -0.1f, 0.0f,     0.0f, 0.8f,  // down-left
+	-0.4f,  0.1f, 0.0f,     0.0f, 1.0f   // up-left
 };
-
-
 unsigned int skillIndices[] = {
 	0, 1, 3, // first triangle
 	1, 2, 3  // second triangle
 };
 
+//-----------------------
+// deepblood-variables
+//-----------------------
+float deepBloodVertices[] = {
+	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
+	0.1f,  0.02f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+	0.1f, -0.02f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.1f, -0.02f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.1f,  0.02f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+};
+unsigned int deepBloodIndices[] = {
+	0, 1, 3, // first triangle
+	1, 2, 3  // second triangle
+};
 
-
-float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+//-----------------------
+// background-variables
+//-----------------------
+float backVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// positions   // texCoords
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	-1.0f, -1.0f,  0.0f, 0.0f,
-	1.0f, -1.0f,  1.0f, 0.0f,
-
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	1.0f, -1.0f,  1.0f, 0.0f,
-	1.0f,  1.0f,  1.0f, 1.0f
+	 1.0f,  1.0f, 0.0f,  1.0f, 1.0f,   // up-right
+	 1.0f, -1.0f, 0.0f,  1.0f, 0.0f, // bottom-right
+	-1.0f, -1.0f, 0.0f,  0.0f, 0.0f, //bottom-left
+	-1.0f,  1.0f, 0.0f,  0.0f, 1.0f, //up-left 
+};
+unsigned int backIndices[] = {
+	0, 1, 3, // first triangle
+	1, 2, 3  // second triangle
 };
 
 float position = 0.0;

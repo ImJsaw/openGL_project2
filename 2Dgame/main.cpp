@@ -22,10 +22,15 @@ int main(int argc, char** argv){
 	init();
 	glutDisplayFunc(display);
 	glutReshapeFunc(ChangeSize);
+
 	glutTimerFunc(deep_interval, Deep_Timer, 0);
 	glutTimerFunc(jump_interval, Jump_Timer, 0);
 	glutKeyboardFunc(Keyboard);
 	glutKeyboardUpFunc(Keyboardup);
+
+	//glutKeyboardFunc(Keyboard2);
+	//glutKeyboardUpFunc(Keyboardup2);
+
 	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 	glutMainLoop();
 	return 0;
@@ -42,6 +47,10 @@ void Deep_Timer(int val){
 	glutTimerFunc(deep_interval, Deep_Timer, val);
 	deepTime += deep_interval * deepSpeed * 0.001;
 	
+	
+	//---------------------------------------------
+	//腳色的連續圖(特殊動作)
+	//---------------------------------------------
 	if (deepImage == 2) { // 火焰攻擊
 
 		// 移動圖片deep
@@ -106,17 +115,35 @@ void Deep_Timer(int val){
 			deepx++;
 		}
 	}
+	else if (deepImage == 0 && deepy == 4) {
+		if (isLeft == 0) {
+			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+		}
+		else if (isLeft == 1) {
+			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+		}
 
-
+		if (deepx == 6) {
+			deepImage = 0; // 換回圖片0
+			deepx = 1; // 回到靜止圖
+			deepy = 1;
+		}
+		else if (deepx != 6) { // deepx 往右走
+			deepx++;
+		}
+	}
+	//---------------------------------------------
+	//技能特效連續圖
+	//---------------------------------------------
 	if (drawSkill == 1 && skillImage == 0) { // 冰火劍氣播放連續圖
-		// 龍向前位移
+		
 		if (isLeft == 0) {
 			
-			offsetSkill = translate(deep_interval * 0.0001, 0, 0) * offsetSkill;
+			offsetSkill = translate((currentTime-deltatime)*10 * deep_interval * 0.0001, 0, 0) * offsetSkill;
 		}
 		else if (isLeft == 1) {
 			
-			offsetSkill = translate(-deep_interval * 0.0001, 0, 0) * offsetSkill;
+			offsetSkill = translate((currentTime - deltatime) * 10 * -deep_interval * 0.0001, 0, 0) * offsetSkill;
 		}
 
 		// skill 連續圖動畫
@@ -134,7 +161,6 @@ void Deep_Timer(int val){
 		}
 
 	}
-
 	else if (drawSkill == 1 && skillImage == 1) { // 紅龍播放連續圖
 		
 		if (isLeft == 0) {
@@ -160,7 +186,6 @@ void Deep_Timer(int val){
 			skillx = 1;
 		}
 	}
-
 	else if (drawSkill == 1 && skillImage == 2) { // 朱利安柱子連續圖
 		if (isLeft) offsetSkill = translate(-0.2, 0, 0) * offset;
 		else offsetSkill = translate(-0.2, 0, 0) * offset;
@@ -179,6 +204,12 @@ void Deep_Timer(int val){
 			skillx = 1;
 		}
 	}
+
+	//---------------------------------------------
+	//血條動畫
+	//---------------------------------------------
+	offsetDeepBlood = translate(0, 0.16, 0) * offset;
+	
 }
 
 void Jump_Timer(int val) {
@@ -186,6 +217,9 @@ void Jump_Timer(int val) {
 	glutPostRedisplay();
 	glutTimerFunc(jump_interval, Jump_Timer, val);
 	currentTime += jump_interval * 0.001; 
+
+	
+
 	// jump_interval 為 30 時，最接近正常每秒的速度
 	if (deepController == 3 || deepController == 7) { // 跳起到著地的時間
 		if ((currentTime - deltatime) >= time_for_a_jump) { // 要著地了，看向哪一方
@@ -223,14 +257,20 @@ void Jump_Timer(int val) {
 // deepDirection : 0左 1上 2右 3下
 void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	switch (key) {
-	case 'e':
+	case 'q': // 扣血
+	case 'Q':
+		deepImage = 0;
+		deepy = 4;
+		offsetDeepBloodLength -= 0.1;
+		break;
+	case 'e': // 朱利安柱
 	case 'E':
 		deepImage = 1;
 		deepy = 2;
 		skillImage = 2; // 朱利安柱子圖片
-		if (isLeft) offsetSkill = translate(-0.2, 0, 0) * offset;
-		else offsetSkill = translate(-0.2, 0, 0) * offset;
-		deltatime = currentTime;
+		if (isLeft) offsetSkill = translate(0, 0, 0) * offset;
+		else offsetSkill = translate(0, 0, 0) * offset;
+		deltatime = currentTime; // 讓柱子有向外飛的感覺
 		drawSkill = 1;
 		break;
 	case 'z': // 一般攻擊狀態，飛龍特效啟動
@@ -239,8 +279,8 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 		deepy = 4;
 
 		skillImage = 1; // 劍氣圖片
-		if (isLeft) offsetSkill = translate(-0.35, 0, 0) * offset;
-		else offsetSkill = translate(-0.1, 0, 0) * offset;
+		if (isLeft) offsetSkill = translate(-0.4, 0, 0) * offset;
+		else offsetSkill = translate(0.4, 0, 0) * offset;
 		drawSkill = 1;
 
 		break;
@@ -248,9 +288,12 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'X':
 		deepImage = 2;
 		skillImage = 0;
-		if(isLeft) offsetSkill = translate(-0.2, 0, 0) * offset;
-		else offsetSkill = translate(-0.1, 0, 0) * offset;
+		if(isLeft) offsetSkill = translate(-0.1, 0, 0) * offset;
+		else offsetSkill = translate(0.1, 0, 0) * offset;
 		drawSkill = 1;
+
+		deltatime = currentTime;
+
 		break;
 	case 'c': // 跳躍
 	case 'C':
@@ -377,13 +420,15 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 	glutPostRedisplay();
 }
 
+
+
 void init() {
 
 	//-----------------------
 	// deep-setting
 	//-----------------------
 	deepController = 0; // 向右站立
-	offset = scale(1, 1, 1); // 初始化矩陣
+	offset = translate(-0.9, 0, 0) * scale(1, 1, 1); // 初始化矩陣，只有腳色的矩陣translate到螢幕左邊
 	deepx = 1; // 貼圖座標移動矩陣
 	deepy = 1;
 	xMove = 0;
@@ -447,6 +492,8 @@ void init() {
 	isLeftID = glGetUniformLocation(programDeep, "isLeft");
 	deepImageID = glGetUniformLocation(programDeep, "deepImage");
 
+
+
 	//-----------------------
 	// skill-setting
 	//-----------------------
@@ -463,8 +510,6 @@ void init() {
 	programSkill = LoadShaders(skillShader);//讀取shader
 
 	glUseProgram(programSkill);//uniform參數數值前必須先use shader
-
-	
 
 	//---------------------------------
 	//dragon instance initialize(五個龍的位置offset)
@@ -507,8 +552,6 @@ void init() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
-
-
 	// --------------------------------------
 	// normal VAO VBO EBO
 	// --------------------------------------
@@ -525,10 +568,6 @@ void init() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOskill);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(deepIndices), deepIndices, GL_STATIC_DRAW);
 
-	
-
-
-
 	//---------------------------------
 	//sword-light
 	//---------------------------------
@@ -544,8 +583,6 @@ void init() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-
-	
 	//---------------------------------
 	//dragon-fly
 	//---------------------------------
@@ -595,15 +632,112 @@ void init() {
 	skillImageID = glGetUniformLocation(programSkill, "skillImage");
 	skillTimeID = glGetUniformLocation(programSkill, "time");
 
+
+	//----------------------------
+	//deepblood setting
+	//---------------------------
+	offsetDeepBlood = translate(0, 0.16, 0) * scale(1, 1, 1);
+	offsetDeepBloodLength = 1;
+
+	ShaderInfo deepBloodShader[] = {
+		{ GL_VERTEX_SHADER, "deepblood.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "deepblood.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programDeepBlood = LoadShaders(deepBloodShader);//讀取shader
+
+	glUseProgram(programDeepBlood);//uniform參數數值前必須先use shader
+
+	glGenVertexArrays(1, &VAOdb);
+	glGenBuffers(1, &VBOdb);
+	glGenBuffers(1, &EBOdb);
+
+	glBindVertexArray(VAOdb);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOdb);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(deepBloodVertices), deepBloodVertices, GL_STATIC_DRAW);
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOdb);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(deepBloodIndices), deepBloodIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord attribute(for image1)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glUseProgram(programDeepBlood);
+
+	deepBloodImg = loadTexture("sys/brightred.jpg");
+
+	glUniform1i(glGetUniformLocation(programDeepBlood, "deepBlood"), 0);
+	
+	offsetDeepBloodID = glGetUniformLocation(programDeepBlood, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
+	offsetDeepBloodLengthID = glGetUniformLocation(programDeepBlood, "offsetBlood");
+
+	//----------------------------
+	//deepblood setting
+	//---------------------------
+
+	ShaderInfo backShader[] = {
+		{ GL_VERTEX_SHADER, "back.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "back.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programBack = LoadShaders(backShader);//讀取shader
+
+	glUseProgram(programBack);//uniform參數數值前必須先use shader
+
+	glGenVertexArrays(1, &VAOb);
+	glGenBuffers(1, &VBOb);
+	glGenBuffers(1, &EBOb);
+	glBindVertexArray(VAOb);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOb);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(backVertices), backVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOb);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(backIndices), backIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// texture coord attribute(for image1)
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	
+	glUseProgram(programBack);
+
+	backgroundImg = loadTexture("bk/back03.jpg");
+
+	glUniform1i(glGetUniformLocation(programBack, "back"), 0);
+
+	
 }
 
 void display() {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	//-----------------------
+	// skill-draw
+	//-----------------------
+	// 在deep之後畫skill，skill才能跟deep一起移動
+	// bind textures on corresponding texture units
+	glUseProgram(programBack);
+	glBindVertexArray(VAOb);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, backgroundImg);
+	
+	glUseProgram(programBack);
+	glBindVertexArray(VAOb);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 	
 	//-----------------------
-	// skill-setting
+	// skill-draw
 	//-----------------------
 	// 在deep之後畫skill，skill才能跟deep一起移動
 	glUseProgram(programSkill);
@@ -645,12 +779,7 @@ void display() {
 	}
 	
 		
-	
-	
-	
-	
-	
-	
+
 	//-----------------------
 	// deep-draw
 	//-----------------------
@@ -678,6 +807,25 @@ void display() {
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	
 	
+	//-----------------------
+	// deepblood-draw
+	//-----------------------
+	glUseProgram(programDeepBlood); // 記得要useprogram 和 vao，不然東西會綁到上一個skillProgram中
+	glBindVertexArray(VAOdb);
+
+	glUniformMatrix4fv(offsetDeepBloodID, 1, false, &offsetDeepBlood[0][0]);
+	glUniform1f(offsetDeepBloodLengthID, offsetDeepBloodLength);
+	
+	// bind textures on corresponding texture units
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, deepBloodImg);
+	
+	// render container
+	glUseProgram(programDeepBlood);
+	glBindVertexArray(VAOdb);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 
 	glFlush();//強制執行上次的OpenGL commands
 	glutSwapBuffers();//調換前台和後台buffer ,當後臺buffer畫完和前台buffer交換使我們看見它

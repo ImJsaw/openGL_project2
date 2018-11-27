@@ -94,8 +94,12 @@
     <ClInclude Include="vgl.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="back.fp" />
+    <None Include="back.vp" />
     <None Include="deep.fp" />
     <None Include="deep.vp" />
+    <None Include="deepblood.fp" />
+    <None Include="deepblood.vp" />
     <None Include="deepskill.fp" />
     <None Include="deepskill.vp" />
   </ItemGroup>

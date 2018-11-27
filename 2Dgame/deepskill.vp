@@ -27,7 +27,7 @@ void main()
 	ourColor = aColor;
 
 	if(skillImage == 0){ // ¦B¤õ¼C®ðªºtexcoord
-		gl_Position = offset * vec4(aPos, 1.0);
+		gl_Position = offset * vec4(aPos.x * time * 10, aPos.y * time * 10, aPos.z, 1.0);
 		if(isLeft == 0){
 			TexCoord = vec2(aTexCoord.x + (skillx-1) * 0.25, aTexCoord.y - (skilly-1) * 1.0 / 2 );
 		}
@@ -54,7 +54,7 @@ void main()
 		vec4 b = vec4(0, 1 , 0, 0);
 		vec4 c = vec4(0, 0 , 1, 0);
 		mat4 xOffset = mat4(a, b, c, t);
-		gl_Position = xOffset * offset * vec4((aPos.x + 0.4) * 2, (aPos.y + 0.07)* 12, aPos.z, 1.0);
+		gl_Position = xOffset * offset * vec4((aPos.x + 0.1) * 2, (aPos.y + 0.07)* 12, aPos.z, 1.0);
 		if(isLeft == 0){
 			TexCoord = vec2(aTexCoord.x + (skillx-1) * 0.25, aTexCoord.y - (skilly-1) * 1.0 / 2 );
 		}
