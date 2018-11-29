@@ -13,7 +13,7 @@
 
 #define GLEW_STATIC
 
-#include <GL/glew.h>
+#include <include/GL/glew.h>
 
 #ifdef _MSC_VER
 #  ifdef _DEBUG
@@ -27,7 +27,7 @@
 
 #define FREEGLUT_STATIC
 
-#include <GL/freeglut.h>
+#include <include/GL/freeglut.h>
 
 #ifdef _MSC_VER
 #  ifdef _DEBUG

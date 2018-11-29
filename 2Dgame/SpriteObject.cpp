@@ -1,6 +1,6 @@
 #include "SpriteObject.h"
 //#include "../../Include/Common.h"
-#include <Common.h>
+#include <include/Common.h>
 
 SpriteObject::SpriteObject()
 {
