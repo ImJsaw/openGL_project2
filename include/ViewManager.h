@@ -1,7 +1,7 @@
 ﻿#ifndef _VIEWMANAGER_H_
 #define _VIEWMANAGER_H_
 
-#include <include/Common.h>
+#include <Common.h>
 
 /**
  * @brief The ViewManager class

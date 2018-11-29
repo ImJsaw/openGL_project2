@@ -16,11 +16,11 @@
 
 
 #define GLM_SWIZZLE
-#include <include/glm/glm.hpp>
-#include <include/glm/gtc/matrix_transform.hpp>
-#include <include/glm/gtc/type_ptr.hpp>
-#include <include/glm/gtx/rotate_vector.hpp>
-#include <include/glm/gtc/random.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtc/random.hpp>
 
 using namespace glm;
 

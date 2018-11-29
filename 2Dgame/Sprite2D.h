@@ -1,6 +1,6 @@
 #pragma once
 //#include "../../Include/Common.h"
-#include <include/Common.h>
+#include <Common.h>
 #include <string>
 
 class Sprite2D
