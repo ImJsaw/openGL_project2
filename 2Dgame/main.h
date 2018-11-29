@@ -19,7 +19,7 @@ using namespace std;
 
 //#define STB_IMAGE_IMPLEMENTATION
 //#include "stb_image.h"
-#include <Common.h>
+#include <include/Common.h>
 #include "Sprite2D.h"
 #include "SpriteObject.h"
 #include "camera.h"

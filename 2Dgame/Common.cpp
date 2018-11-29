@@ -1,8 +1,8 @@
 //#include "../Include/Common.h"
-#include <Common.h>
+#include <include/Common.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <STB/stb_image.h>
+#include <include/STB/stb_image.h>
 
 //#pragma comment (lib, "glew32.lib")
 //#pragma comment(lib, "freeglut.lib")
