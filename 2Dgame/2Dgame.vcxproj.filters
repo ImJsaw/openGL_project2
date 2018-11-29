@@ -39,6 +39,12 @@
     <ClInclude Include="SpriteObject.h">
       <Filter>header</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="particle_generator.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="back.fp">
@@ -69,6 +75,12 @@
       <Filter>shader</Filter>
     </None>
     <None Include="particle.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="point_sprite.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="point_sprite.vp">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

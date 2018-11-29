@@ -1,6 +1,8 @@
 #include "main.h"
 
-vec3 camera = vec3(0,0,20);
+//vec3 camera = vec3(0,0,20);
+Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
+glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
 int main(int argc, char** argv){
 	glutInit(&argc, argv);
@@ -10,7 +12,7 @@ int main(int argc, char** argv){
 
 	//multisample for golygons smooth
 	glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH|GLUT_MULTISAMPLE);
-	glutInitWindowSize(800, 600);
+	glutInitWindowSize(SCR_WIDTH, SCR_HEIGHT);
 	glutCreateWindow("OpenGL 4.3 - 2D Game - LF2");
 
 	glewExperimental = GL_TRUE; //置於glewInit()之前
@@ -25,6 +27,7 @@ int main(int argc, char** argv){
 
 	glutTimerFunc(deep_interval, Deep_Timer, 0);
 	glutTimerFunc(jump_interval, Jump_Timer, 0);
+	glutTimerFunc(deep_walk_interval, Deep_Walk_Timer, 0);
 	glutKeyboardFunc(Keyboard);
 	glutKeyboardUpFunc(Keyboardup);
 
@@ -47,7 +50,10 @@ void Deep_Timer(int val){
 	glutTimerFunc(deep_interval, Deep_Timer, val);
 	deepTime += deep_interval * deepSpeed * 0.001;
 	
-	
+	//讓燈源左右移動
+	lightPos[0] = sin(deepTime);
+	lightPos[2] = cos(deepTime);
+
 	//---------------------------------------------
 	//腳色的連續圖(特殊動作)
 	//---------------------------------------------
@@ -212,6 +218,17 @@ void Deep_Timer(int val){
 	
 }
 
+void Deep_Walk_Timer(int val) {
+	glutPostRedisplay();
+	glutTimerFunc(deep_walk_interval, Deep_Walk_Timer, val);
+	deepWalkTime += deep_walk_interval * 0.001;
+	/*if (deepDirection != -1) {//normal move
+		offset = translate(deep_walk_interval * 0.0001* xMove, deep_walk_interval * 0.0001* yMove, 0) * offset;
+		deepx++;
+		if (deepx == 8) deepx = 3;
+	}*/
+}
+
 void Jump_Timer(int val) {
 
 	glutPostRedisplay();
@@ -245,31 +262,53 @@ void Jump_Timer(int val) {
 			offset = translate(0, cos( radian )*0.05, 0) * offset; // 跳躍的矩陣
 		}
 	}
-	else if(deepDirection != -1){//normal move
+	if(deepDirection != -1){//normal move
 		offset = translate(jump_interval * 0.001* xMove, jump_interval * 0.001* yMove, 0) * offset;
 		deepx++;
-		if (deepx == 8) deepx = 1;
+		if (deepx == 8) deepx = 3;
 	}
 
-	/*//------------------------------
+	//------------------------------
 	//particle zone
 	//-----------------------------
 	// Add new particles
 	for (GLuint i = 0; i < nr_new_particles; ++i)
 	{
 		int unusedParticle = FirstUnusedParticle();
-		RespawnParticle(particles[unusedParticle], vec2(offset[3][0], offset[3][1]), vec2(0.1, 0.08));
+		vec4 deepPos = offset * deepPosition; // deep的位置
+		//printf("deepPos = %d , %d\n", deepPos[0], deepPos[1]);
+		RespawnParticle(particles[unusedParticle], vec2(deepPos[0], deepPos[1]), vec2(0.1, 0.1));
+		//printf("Respawn...\n");
+		// (生命結束的粒子, 主角位置, 主角半徑)
 	}
 	// Uupdate all particles
 	for (GLuint i = 0; i < nr_particles; ++i)
 	{
 		Particle &p = particles[i];
 		// jump_interval * 0.001 是 每一禎的時間差
-		p.Life -= (jump_interval * 0.001); // reduce life
+		p.Life -= dt; // reduce life
 		if (p.Life > 0.0f)
 		{	// particle is alive, thus update
-			p.Position -= p.Velocity * vec2(jump_interval * 0.001, jump_interval * 0.001);
-			p.Color.a -= (jump_interval * 0.001) * 2.5;
+			//p.Position -= p.Velocity * vec2(jump_interval * 0.001, jump_interval * 0.001);
+			p.Position -= p.Velocity * dt;
+			p.Color.a -= dt * 2.5;
+		}
+	}
+
+	/*for (GLuint i = 0; i < nr_new_particles; ++i)
+	{
+		int unusedParticle = FirstUnusedParticle();
+		RespawnParticle(particles[unusedParticle], object, offset);
+	}
+	// Uupdate all particles
+	for (GLuint i = 0; i < nr_particles; ++i)
+	{
+		Particle &p = particles[i];
+		p.Life -= dt; // reduce life
+		if (p.Life > 0.0f)
+		{	// particle is alive, thus update
+			p.Position -= p.Velocity * dt;
+			p.Color.a -= dt * 2.5;
 		}
 	}*/
 
@@ -391,14 +430,14 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 		case 'w':
 			yMove--;
 			if(!xMove) deepDirection = -1;
-			deepx = 1; // 回到站立
+			deepx = 3; // 回到站立
 			deepy = 1;
 			break;
 		case 'S': // 往下走
 		case 's':
 			yMove++;
 			if (!xMove) deepDirection = -1;
-			deepx = 1; // 回到站立
+			deepx = 3; // 回到站立
 			deepy = 1;
 			break;
 		case 'a':
@@ -504,12 +543,18 @@ void init() {
 	
 	for (int spriteID = 0; spriteID < objectCount; ++spriteID)
 	{
-		spriteSheets[spriteID] = new Sprite2D();
+		deepSheets[spriteID] = new Sprite2D();
 	}
-	spriteSheets[0]->Init("sys/deep_0.png", 7, 10, 40);
-	spriteSheets[1]->Init("sys/deep_1.png", 7, 10, 40);
-	spriteSheets[2]->Init("sys/deep_2.png", 4, 10, 40);
-
+	deepSheets[0]->Init("sys/deep_0.png", 7, 10, 40);
+	deepSheets[1]->Init("sys/deep_1.png", 7, 10, 40);
+	deepSheets[2]->Init("sys/deep_2.png", 4, 10, 40);
+	for (int spriteID = 0; spriteID < objectCount; ++spriteID)
+	{
+		deepNormalSheets[spriteID] = new Sprite2D();
+	}
+	deepNormalSheets[0]->Init("sys/deep_0_normal.png", 7, 10, 40);
+	deepNormalSheets[1]->Init("sys/deep_1_normal.png", 7, 10, 40);
+	deepNormalSheets[2]->Init("sys/deep_2_normal.png", 4, 10, 40);
 
 	//glUniform1i(glGetUniformLocation(programDeep, "deep_0"), 0);
 	//glUniform1i(glGetUniformLocation(programDeep, "deep_1"), 1);
@@ -522,8 +567,10 @@ void init() {
 	deepyID = glGetUniformLocation(programDeep, "deepy");
 	isLeftID = glGetUniformLocation(programDeep, "isLeft");
 	deepImageID = glGetUniformLocation(programDeep, "deepImage");
-
-
+	projectionDeepID = glGetUniformLocation(programDeep, "projection");
+	viewDeepID = glGetUniformLocation(programDeep, "view");
+	viewPosDeepID = glGetUniformLocation(programDeep, "viewPos");
+	lightPosDeepID = glGetUniformLocation(programDeep, "lightPos");
 
 	//-----------------------
 	// skill-setting
@@ -748,26 +795,45 @@ void init() {
 
 	glUniform1i(glGetUniformLocation(programBack, "back"), 0);
 
-	/*//--------------------------
+	//--------------------------
 	//particle system
 	//--------------------------
+
+	offsetParticle = scale(1,1,1);
+
+	// debug，記得改shader
 	ShaderInfo particleShader[] = {
-		{ GL_VERTEX_SHADER, "back.vp" },//vertex shader
-	{ GL_FRAGMENT_SHADER, "back.fp" },//fragment shader
+		{ GL_VERTEX_SHADER, "particle.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "particle.fp" },//fragment shader
 	{ GL_NONE, NULL } };
 	programParticle = LoadShaders(particleShader);//讀取shader
 
 	glUseProgram(programParticle);//uniform參數數值前必須先use shader
+	
 	glGenVertexArrays(1, &VAOp);
 	glGenBuffers(1, &VBOp);
+	glGenBuffers(1, &EBOp);
 	glBindVertexArray(VAOp);
-	// Fill mesh buffer
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBOp);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(particle_quad), particle_quad, GL_STATIC_DRAW);
-	// Set mesh attributes
+	glBufferData(GL_ARRAY_BUFFER, sizeof(particleVertices), particleVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOb);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(backIndices), backIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
-	glBindVertexArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord attribute(for image1)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glUseProgram(programParticle);
+
+
 
 	particleImg = loadTexture("sys/particle.png");
 
@@ -776,11 +842,73 @@ void init() {
 	offsetParticleID = glGetUniformLocation(programParticle, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
 	colorParticleID = glGetUniformLocation(programParticle, "color");
 	projectionID = glGetUniformLocation(programParticle, "projection");
+	offsetParticleMatrixID = glGetUniformLocation(programParticle, "offsetMat");
+	particleTimeID = glGetUniformLocation(programParticle, "time");
+	particleLifeID = glGetUniformLocation(programParticle, "life");
 
 	for (GLuint i = 0; i < nr_particles; ++i)
-		particles.push_back(Particle());*/
+		particles.push_back(Particle());
 
+	/*ShaderInfo particleShader[] = {
+		{ GL_VERTEX_SHADER, "back.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "back.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programParticle = LoadShaders(particleShader);//讀取shader
 
+	glUseProgram(programParticle);//uniform參數數值前必須先use shader
+
+	glGenVertexArrays(1, &VAOp);
+	glBindVertexArray(VAOp);
+
+	projectionID = glGetUniformLocation(programParticle, "proj_matrix");
+	particleTimeID = glGetUniformLocation(programParticle, "time");
+
+	glGenVertexArrays(1, &VAOp);
+	glBindVertexArray(VAOp);
+
+	struct star_t
+	{
+		glm::vec3     position;
+		glm::vec3     color;
+	};
+
+	glGenBuffers(1, &VBOp);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOp);
+	glBufferData(GL_ARRAY_BUFFER, NUM_STARS * sizeof(star_t), NULL, GL_STATIC_DRAW);
+
+	star_t * star = (star_t *)glMapBufferRange(GL_ARRAY_BUFFER, 0, NUM_STARS * sizeof(star_t), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	int i;
+
+	for (i = 0; i < 1000; i++)
+	{
+		star[i].position[0] = (random_float() * 2.0f - 1.0f) * 100.0f;
+		star[i].position[1] = (random_float() * 2.0f - 1.0f) * 100.0f;
+		star[i].position[2] = random_float();
+		star[i].color[0] = 0.8f + random_float() * 0.2f;
+		star[i].color[1] = 0.8f + random_float() * 0.2f;
+		star[i].color[2] = 0.8f + random_float() * 0.2f;
+	}
+
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(star_t), NULL);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(star_t), (void *)sizeof(glm::vec3));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+
+	TextureData tdata = Common::Load_png("./7.5.Point_Sprite/star.png");
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glGenTextures(1, &m_texture);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tdata.width, tdata.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tdata.data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);*/
 }
 
 void display() {
@@ -843,28 +971,65 @@ void display() {
 		}
 	}
 	
-	/*// -----------------------
+	// -----------------------
 	//deep-particle draw
 	// -----------------------
 	// Use additive blending to give it a 'glow' effect
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glUseProgram(programParticle);
+	glBindVertexArray(VAOp);
 	for (Particle particle : particles)
 	{
 		if (particle.Life > 0.0f)
 		{
-			glUniform2f(offsetParticleID, particle.Position.x, particle.Position.y);
-			glUniform4f(colorParticleID, particle.Color.r, particle.Color.g, particle.Color.b, particle.Color.a);
+			//glUniform2f(offsetParticleID, particle.Position.x, particle.Position.y);
+			//glUniform4f(colorParticleID, particle.Color.r, particle.Color.g, particle.Color.b, particle.Color.a);
+			glUniform2fv(offsetParticleID, 1, &particle.Position[0]);
+			glUniform4fv(colorParticleID, 1, &particle.Color[0]);
 			glUniformMatrix4fv(projectionID, 1, false, &projection[0][0]);
+			glUniformMatrix4fv(offsetParticleMatrixID, 1, false, &offsetParticle[0][0]);
+			glUniform1f(particleTimeID, currentTime);
+			glUniform1f(particleLifeID, particle.Life);
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, particleImg);
 			glBindVertexArray(VAOp);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glUseProgram(programParticle);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 		}
 	}
 	// Don't forget to reset to default blending mode
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+
+	/*//Update shaders' input variable
+	///////////////////////////	
+	static const GLfloat black[] = { 0.0f, 0, 0.0f, 1.0f };
+	static const GLfloat one = 1.0f;
+
+	glClearBufferfv(GL_COLOR, 0, black);
+	glClearBufferfv(GL_DEPTH, 0, &one);
+
+	glUseProgram(programParticle);
+
+	float f_timer_cnt = glutGet(GLUT_ELAPSED_TIME);
+	float currentTime = f_timer_cnt * 0.001f;
+
+	currentTime *= 0.1f;
+	currentTime -= floor(currentTime);
+
+	glUniform1f(particleTimeID, currentTime);
+	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projectionParticle[0][0]);
+
+	glEnable(GL_POINT_SPRITE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	glDrawArrays(GL_POINTS, 0, NUM_STARS);*/
 
 
 
@@ -882,6 +1047,19 @@ void display() {
 	glUniform1i(isLeftID, isLeft);
 	glUniform1i(deepImageID, deepImage);
 	// bind textures on corresponding texture units
+	glm::mat4 projection = glm::ortho(0.0f, SCR_WIDTH, SCR_HEIGHT, 0.0f, -1.0f, 1.0f);  
+	glm::mat4 view = camera.GetViewMatrix();
+	glUseProgram(programDeep);
+	glUniformMatrix4fv(projectionDeepID, 1, false, &projection[0][0]);
+	glUniformMatrix4fv(viewDeepID, 1, false, &view[0][0]);
+	// render normal-mapped quad
+	//shader.setMat4("model", model);
+	glUniform3fv(viewPosDeepID, 1, &camera.Position[0]);
+	glUniform3fv(lightPosDeepID, 1, &lightPos[0]);
+	//shader.setVec3("viewPos", camera.Position);
+	//shader.setVec3("lightPos", lightPos);
+
+
 
 	//glActiveTexture(GL_TEXTURE0);
 	//glBindTexture(GL_TEXTURE_2D, deep_0);
@@ -890,15 +1068,17 @@ void display() {
 	//glActiveTexture(GL_TEXTURE2);
 	//glBindTexture(GL_TEXTURE_2D, deep_2);
 	glActiveTexture(GL_TEXTURE0);
-	spriteSheets[deepImage]->Enable();
+	deepSheets[deepImage]->Enable();
+	glActiveTexture(GL_TEXTURE1);
+	deepNormalSheets[deepImage]->Enable();
 
 
 	// render container
 	glUseProgram(programDeep);
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	spriteSheets[deepImage]->Disable();
-	
+	deepSheets[deepImage]->Disable();
+	deepNormalSheets[deepImage]->Disable();
 	//-----------------------
 	// deepblood-draw
 	//-----------------------
@@ -985,12 +1165,31 @@ GLuint FirstUnusedParticle()
 	return 0;
 }
 
-void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offset)
+void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offsett)
 {
-	GLfloat random = ((rand() % 100) - 50) / 10.0f;
+	//GLfloat random = ((rand() % 100) - 50) / 10.0f;
+	GLfloat random = ((rand() % 100) - 50) / 1000.0f;
+	GLfloat random2 = ((rand() % 100) - 80) / 1000.0f;
 	GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
-	particle.Position = charPos + random + offset;
+	//particle.Position = charPos + random + offsett; // 主角位置 + 隨機 + 主角半徑
+	particle.Position = vec2(charPos.x + random, charPos.y + random2);
+	offsetParticle = translate(particle.Position.x, particle.Position.y, 0.0) * offsetParticle;
 	particle.Color = glm::vec4(rColor, rColor, rColor, 1.0f);
 	particle.Life = 1.0f;
-	particle.Velocity = vec2(5, 5) * 0.1f;
+	particle.Velocity = vec2(dt, dt) * 0.1f;
+	//printf("%d , %d\n", particle.Position.x, particle.Position.y);
+}
+
+static inline float random_float()
+{
+	float res;
+	unsigned int tmp;
+
+	seed *= 16807;
+
+	tmp = seed ^ (seed >> 4) ^ (seed << 15);
+
+	*((unsigned int *)&res) = (tmp >> 9) | 0x3F800000;
+
+	return (res - 1.0f);
 }

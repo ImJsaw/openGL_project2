@@ -93,8 +93,10 @@
     <ClCompile Include="ViewManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="LoadShaders.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="particle_generator.h" />
     <ClInclude Include="resource_manager.h" />
     <ClInclude Include="Sprite2D.h" />
     <ClInclude Include="SpriteObject.h" />
@@ -111,6 +113,8 @@
     <None Include="deepskill.vp" />
     <None Include="particle.fp" />
     <None Include="particle.vp" />
+    <None Include="point_sprite.fp" />
+    <None Include="point_sprite.vp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

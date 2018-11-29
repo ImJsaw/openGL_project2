@@ -22,6 +22,11 @@ using namespace std;
 #include <Common.h>
 #include "Sprite2D.h"
 #include "SpriteObject.h"
+#include "camera.h"
+
+GLfloat SCR_WIDTH = 800;
+GLfloat SCR_HEIGHT = 600;
+
 
 void init();
 
@@ -36,6 +41,11 @@ void	Deep_Timer(int val);
 float	deep_interval = 60;
 float	deepTime = 0.0f;
 double	deepSpeed = 1.0f;
+
+void Deep_Walk_Timer(int val);
+float	deep_walk_interval = 80;
+float	deepWalkTime = 0.0f;
+double	deepWalkSpeed = 1.0f;
 
 void	Jump_Timer(int val);
 float	jump_interval = 30;
@@ -75,6 +85,7 @@ GLuint EBOb;
 
 GLuint VAOp;
 GLuint VBOp;
+GLuint EBOp;
 
 unsigned int programDeep; // deep-program
 unsigned int programSkill; // deep-program
@@ -98,6 +109,10 @@ GLuint deepxID;
 GLuint deepyID;
 GLuint isLeftID;
 GLuint deepImageID;
+GLuint projectionDeepID;
+GLuint viewDeepID;
+GLuint viewPosDeepID;
+GLuint lightPosDeepID;
 
 //-----------------------
 // skill-shader ID 位址
@@ -125,6 +140,9 @@ GLuint offsetDeepBloodLengthID;
 GLuint offsetParticleID;
 GLuint colorParticleID;
 GLuint projectionID;
+GLuint offsetParticleMatrixID;
+GLuint particleTimeID;
+GLuint particleLifeID;
 
 //-----------------------
 // deep-variables
@@ -135,7 +153,8 @@ int deepy; // 移動貼圖座標
 int deep_0; // 圖片1
 int deep_1;
 int deep_2;
-Sprite2D* spriteSheets[3];
+Sprite2D* deepSheets[3];
+Sprite2D* deepNormalSheets[3];
 int objectCount = 3;
 int isLeft; // 是不是左邊
 int deepDirection; // 左上右下
@@ -171,7 +190,10 @@ int backgroundImg;
 //-----------------------
 //particle-variables
 //-----------------------
+
 int particleImg;
+mat4 offsetParticle;
+mat4 projectionParticle;
 
 //-----------------------
 // deep-vertices
@@ -185,10 +207,10 @@ int particleImg;
 };*/
 float deepVertices[] = {
 	// positions          // colors           // texture coords for img 0/1
-	0.08f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-	0.08f, -0.1f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-	-0.08, -0.1f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-	-0.08f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+	0.1f,  0.12f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+	0.1f, -0.12f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.1, -0.12f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.1f,  0.12f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
 
 float deepTexCoord2[] = { // deep的第二張圖座標不同
@@ -254,8 +276,9 @@ unsigned int backIndices[] = {
 	1, 2, 3  // second triangle
 };
 
-
-//粒子系統
+//----------------------------------------
+//粒子系統(learn opengl code)
+//----------------------------------------
 struct Particle {
 	glm::vec2 Position, Velocity;
 	glm::vec4 Color;
@@ -273,16 +296,39 @@ GLuint FirstUnusedParticle();
 void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offset);
 
 GLfloat particle_quad[] = {
-	0.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, 0.0f, 0.0f, 0.0f,
+	-0.01f, 0.01f, 0.0f, 1.0f, // left-up
+	0.01f, -0.01f, 1.0f, 0.0f, //right-down
+	-0.01f, -0.01f, 0.0f, 0.0f, //left-down
 
-	0.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 0.0f, 1.0f, 0.0f
+	-0.01f, 0.01f, 0.0f, 1.0f, // left-up
+	0.01f, 0.01f, 1.0f, 1.0f, //right-up
+	0.01f, -0.01f, 1.0f, 0.0f //right-down
 };
-glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(800), static_cast<GLfloat>(600), 0.0f, -1.0f, 1.0f);
+float particleVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions                            // texCoords
+	 0.01f,  0.01f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,   // up-right
+	 0.01f, -0.01f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // bottom-right
+	-0.01f, -0.01f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, //bottom-left
+	-0.01f,  0.01f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f //up-left 
+};
+unsigned int particleIndices[] = {
+	0, 1, 3, // first triangle
+	1, 2, 3  // second triangle
+};
+glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
+glm::vec4 deepPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+GLfloat dt = jump_interval * 0.001;
 
+//-------------------------------------------
+//yao-chih-yuan code
+//-------------------------------------------
+static unsigned int seed = 0x13371337;
+enum
+{
+	NUM_STARS = 1000
+};
+static inline float random_float();
+GLuint m_texture;
 
 float position = 0.0;
 float angle = 0.0;
