@@ -18,12 +18,19 @@ uniform int deepy;
 uniform int isLeft; // 0:right 1:left
 uniform int deepImage; // 0, 1, 2 
 flat out int deepImg;
+flat out int deep_x;
+flat out int deep_y;
+
+const vec2[] points = vec2[4](vec2(-0.5, -0.5), vec2(0.5, -0.5), vec2(-0.5, 0.5), vec2(0.5, 0.5));
+const vec2[] uv = vec2[4](vec2(0, 0), vec2(1, 0), vec2(0, 1), vec2(1, 1));
 
 void main()
 {
+	//gl_Position = offset * vec4(aPos, 1.0);
+	//gl_Position = offset * vec4(points[gl_VertexID], 1.0);
 	gl_Position = offset * vec4(aPos, 1.0);
 	ourColor = aColor;
-	if(deepImage == 0){ // 走路圖的texcoord
+	/*if(deepImage == 0){ // 走路圖的texcoord
 		if(isLeft == 0){
 			TexCoord = vec2(aTexCoord.x + (deepx-1) * 0.1, aTexCoord.y - (deepy-1) * 1.0 / 7 );
 		}
@@ -47,9 +54,14 @@ void main()
 		else {
 			TexCoord = vec2( 1.0 - (aTexCoord.x + (10-deepx) * 0.1), aTexCoord.y - (deepy-1) * 1.0 / 7 );
 		}
+	}*/
+	
+	if(isLeft == 1){
+		TexCoord = vec2(1.0 - aTexCoord.x, aTexCoord.y);
 	}
-	
-	
+	TexCoord = aTexCoord;
 	mariocontroller = mario_controller;
 	deepImg = deepImage;
+	deep_x = deepx;
+	deep_y = deepy;
 }

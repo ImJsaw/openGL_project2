@@ -42,9 +42,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\Include;$(IncludePath)</IncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>../lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\..\Libs\VC;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -84,13 +85,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Sprite2D.cpp" />
+    <ClCompile Include="SpriteObject.cpp" />
+    <ClCompile Include="tiny_obj_loader.cpp" />
+    <ClCompile Include="ViewManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LoadShaders.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="resource_manager.h" />
-    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Sprite2D.h" />
+    <ClInclude Include="SpriteObject.h" />
     <ClInclude Include="vgl.h" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +109,8 @@
     <None Include="deepblood.vp" />
     <None Include="deepskill.fp" />
     <None Include="deepskill.vp" />
+    <None Include="particle.fp" />
+    <None Include="particle.vp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

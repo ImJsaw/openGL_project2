@@ -251,6 +251,28 @@ void Jump_Timer(int val) {
 		if (deepx == 8) deepx = 1;
 	}
 
+	/*//------------------------------
+	//particle zone
+	//-----------------------------
+	// Add new particles
+	for (GLuint i = 0; i < nr_new_particles; ++i)
+	{
+		int unusedParticle = FirstUnusedParticle();
+		RespawnParticle(particles[unusedParticle], vec2(offset[3][0], offset[3][1]), vec2(0.1, 0.08));
+	}
+	// Uupdate all particles
+	for (GLuint i = 0; i < nr_particles; ++i)
+	{
+		Particle &p = particles[i];
+		// jump_interval * 0.001 是 每一禎的時間差
+		p.Life -= (jump_interval * 0.001); // reduce life
+		if (p.Life > 0.0f)
+		{	// particle is alive, thus update
+			p.Position -= p.Velocity * vec2(jump_interval * 0.001, jump_interval * 0.001);
+			p.Color.a -= (jump_interval * 0.001) * 2.5;
+		}
+	}*/
+
 }
 
 //  deepController : 跳7,走65,站4:左   右:0站,12走,3跳
@@ -268,8 +290,8 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 		deepImage = 1;
 		deepy = 2;
 		skillImage = 2; // 朱利安柱子圖片
-		if (isLeft) offsetSkill = translate(0, 0, 0) * offset;
-		else offsetSkill = translate(0, 0, 0) * offset;
+		if (isLeft) offsetSkill = offset;
+		else offsetSkill = offset;
 		deltatime = currentTime; // 讓柱子有向外飛的感覺
 		drawSkill = 1;
 		break;
@@ -428,7 +450,7 @@ void init() {
 	// deep-setting
 	//-----------------------
 	deepController = 0; // 向右站立
-	offset = translate(-0.9, 0, 0) * scale(1, 1, 1); // 初始化矩陣，只有腳色的矩陣translate到螢幕左邊
+	offset = translate(-0.9, 0, 0); // 初始化矩陣，只有腳色的矩陣translate到螢幕左邊
 	deepx = 1; // 貼圖座標移動矩陣
 	deepy = 1;
 	xMove = 0;
@@ -476,13 +498,22 @@ void init() {
 
 	glUseProgram(programDeep);
 	
-	deep_0 = loadTexture("sys/deep_0.png");
-	deep_1 = loadTexture("sys/deep_1.png");
-	deep_2 = loadTexture("sys/deep_2.png");
+	//deep_0 = loadTexture("sys/deep_0.png");
+	//deep_1 = loadTexture("sys/deep_1.png");
+	//deep_2 = loadTexture("sys/deep_2.png");
 	
-	glUniform1i(glGetUniformLocation(programDeep, "deep_0"), 0);
-	glUniform1i(glGetUniformLocation(programDeep, "deep_1"), 1);
-	glUniform1i(glGetUniformLocation(programDeep, "deep_2"), 2);
+	for (int spriteID = 0; spriteID < objectCount; ++spriteID)
+	{
+		spriteSheets[spriteID] = new Sprite2D();
+	}
+	spriteSheets[0]->Init("sys/deep_0.png", 7, 10, 40);
+	spriteSheets[1]->Init("sys/deep_1.png", 7, 10, 40);
+	spriteSheets[2]->Init("sys/deep_2.png", 4, 10, 40);
+
+
+	//glUniform1i(glGetUniformLocation(programDeep, "deep_0"), 0);
+	//glUniform1i(glGetUniformLocation(programDeep, "deep_1"), 1);
+	//glUniform1i(glGetUniformLocation(programDeep, "deep_2"), 2);
 
 	deepcontrollerID = glGetUniformLocation(programDeep, "mario_controller");
 	timeID = glGetUniformLocation(programDeep, "time");
@@ -636,7 +667,7 @@ void init() {
 	//----------------------------
 	//deepblood setting
 	//---------------------------
-	offsetDeepBlood = translate(0, 0.16, 0) * scale(1, 1, 1);
+	offsetDeepBlood = translate(0, 0.16, 0);
 	offsetDeepBloodLength = 1;
 
 	ShaderInfo deepBloodShader[] = {
@@ -717,7 +748,39 @@ void init() {
 
 	glUniform1i(glGetUniformLocation(programBack, "back"), 0);
 
-	
+	/*//--------------------------
+	//particle system
+	//--------------------------
+	ShaderInfo particleShader[] = {
+		{ GL_VERTEX_SHADER, "back.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "back.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programParticle = LoadShaders(particleShader);//讀取shader
+
+	glUseProgram(programParticle);//uniform參數數值前必須先use shader
+	glGenVertexArrays(1, &VAOp);
+	glGenBuffers(1, &VBOp);
+	glBindVertexArray(VAOp);
+	// Fill mesh buffer
+	glBindBuffer(GL_ARRAY_BUFFER, VBOp);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(particle_quad), particle_quad, GL_STATIC_DRAW);
+	// Set mesh attributes
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+	glBindVertexArray(0);
+
+	particleImg = loadTexture("sys/particle.png");
+
+	glUniform1i(glGetUniformLocation(programParticle, "sprite"), 0);
+
+	offsetParticleID = glGetUniformLocation(programParticle, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
+	colorParticleID = glGetUniformLocation(programParticle, "color");
+	projectionID = glGetUniformLocation(programParticle, "projection");
+
+	for (GLuint i = 0; i < nr_particles; ++i)
+		particles.push_back(Particle());*/
+
+
 }
 
 void display() {
@@ -725,9 +788,8 @@ void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//-----------------------
-	// skill-draw
+	// background-draw
 	//-----------------------
-	// 在deep之後畫skill，skill才能跟deep一起移動
 	// bind textures on corresponding texture units
 	glUseProgram(programBack);
 	glBindVertexArray(VAOb);
@@ -781,7 +843,30 @@ void display() {
 		}
 	}
 	
-		
+	/*// -----------------------
+	//deep-particle draw
+	// -----------------------
+	// Use additive blending to give it a 'glow' effect
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glUseProgram(programParticle);
+	for (Particle particle : particles)
+	{
+		if (particle.Life > 0.0f)
+		{
+			glUniform2f(offsetParticleID, particle.Position.x, particle.Position.y);
+			glUniform4f(colorParticleID, particle.Color.r, particle.Color.g, particle.Color.b, particle.Color.a);
+			glUniformMatrix4fv(projectionID, 1, false, &projection[0][0]);
+			glBindTexture(GL_TEXTURE_2D, particleImg);
+			glBindVertexArray(VAOp);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindVertexArray(0);
+		}
+	}
+	// Don't forget to reset to default blending mode
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+
+
+
 
 	//-----------------------
 	// deep-draw
@@ -798,17 +883,21 @@ void display() {
 	glUniform1i(deepImageID, deepImage);
 	// bind textures on corresponding texture units
 
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, deep_0);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, deep_1);
+	//glActiveTexture(GL_TEXTURE2);
+	//glBindTexture(GL_TEXTURE_2D, deep_2);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, deep_0);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, deep_1);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, deep_2);
+	spriteSheets[deepImage]->Enable();
+
+
 	// render container
 	glUseProgram(programDeep);
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	
+	spriteSheets[deepImage]->Disable();
 	
 	//-----------------------
 	// deepblood-draw
@@ -834,7 +923,7 @@ void display() {
 	glutSwapBuffers();//調換前台和後台buffer ,當後臺buffer畫完和前台buffer交換使我們看見它
 }
 
-unsigned int loadTexture(char const * path)
+/*unsigned int loadTexture(char const * path)
 {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -873,4 +962,35 @@ unsigned int loadTexture(char const * path)
 	}
 
 	return textureID;
+}*/
+
+GLuint FirstUnusedParticle()
+{
+	// Search from last used particle, this will usually return almost instantly
+	for (GLuint i = lastUsedParticle; i < nr_particles; ++i) {
+		if (particles[i].Life <= 0.0f) {
+			lastUsedParticle = i;
+			return i;
+		}
+	}
+	// Otherwise, do a linear search
+	for (GLuint i = 0; i < lastUsedParticle; ++i) {
+		if (particles[i].Life <= 0.0f) {
+			lastUsedParticle = i;
+			return i;
+		}
+	}
+	// Override first particle if all others are alive
+	lastUsedParticle = 0;
+	return 0;
+}
+
+void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offset)
+{
+	GLfloat random = ((rand() % 100) - 50) / 10.0f;
+	GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
+	particle.Position = charPos + random + offset;
+	particle.Color = glm::vec4(rColor, rColor, rColor, 1.0f);
+	particle.Life = 1.0f;
+	particle.Velocity = vec2(5, 5) * 0.1f;
 }

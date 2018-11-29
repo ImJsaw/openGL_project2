@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="tiny_obj_loader.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewManager.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite2D.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteObject.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="vgl.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_manager.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadShaders.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite2D.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteObject.h">
+      <Filter>header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="back.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="back.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="deep.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="deep.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="deepblood.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="deepblood.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="deepskill.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="deepskill.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="particle.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="particle.vp">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shader">
+      <UniqueIdentifier>{4f23faf0-2e73-44fa-92ea-b4c3a723f0d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header">
+      <UniqueIdentifier>{c5e51581-00d5-4f29-a5ef-a52426ce7bef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools">
+      <UniqueIdentifier>{a1c662d4-dea0-4032-bf0b-61d2cf341798}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{8c33da9d-6ace-4240-aaae-dd8c760828f7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

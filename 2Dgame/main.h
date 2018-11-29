@@ -1,3 +1,5 @@
+//$(SolutionDir)$(Configuration)\
+//$(ProjectDir)
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -9,14 +11,17 @@ using namespace std;
 
 #include "vgl.h"
 #include "LoadShaders.h"
-// Include GLM
-#include <include/glm/glm.hpp>
-#include <include/glm/gtc/matrix_transform.hpp>
-using namespace glm;
+//Include GLM
+//#include <glm/glm.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+//using namespace glm;
 
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb_image.h"
+#include <Common.h>
+#include "Sprite2D.h"
+#include "SpriteObject.h"
 
 void init();
 
@@ -68,10 +73,14 @@ GLuint VAOb;
 GLuint VBOb;
 GLuint EBOb;
 
+GLuint VAOp;
+GLuint VBOp;
+
 unsigned int programDeep; // deep-program
 unsigned int programSkill; // deep-program
 unsigned int programDeepBlood;
 unsigned int programBack;
+unsigned int programParticle;
 
 
 int pNo;
@@ -107,10 +116,15 @@ GLuint offsetDeepBloodID;
 GLuint offsetDeepBloodLengthID;
 
 //-----------------------
-// backGround-shader ID 位址
+// background-shader ID 位址
 //-----------------------
 
-
+//-----------------------
+// particle-shader ID 位址
+//-----------------------
+GLuint offsetParticleID;
+GLuint colorParticleID;
+GLuint projectionID;
 
 //-----------------------
 // deep-variables
@@ -121,6 +135,8 @@ int deepy; // 移動貼圖座標
 int deep_0; // 圖片1
 int deep_1;
 int deep_2;
+Sprite2D* spriteSheets[3];
+int objectCount = 3;
 int isLeft; // 是不是左邊
 int deepDirection; // 左上右下
 int deepImage;
@@ -153,21 +169,35 @@ float offsetDeepBloodLength; // 扣血
 int backgroundImg;
 
 //-----------------------
+//particle-variables
+//-----------------------
+int particleImg;
+
+//-----------------------
 // deep-vertices
 //-----------------------
-float deepVertices[] = {
+/*float deepVertices[] = {
 	// positions          // colors           // texture coords for img 0/1
 	0.08f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,  0.1f, 1.0f,      
 	0.08f, -0.1f, 0.0f,   0.0f, 1.0f, 0.0f,   0.1f, 0.87f,    
 	-0.08, -0.1f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.87f,   
 	-0.08f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f   
+};*/
+float deepVertices[] = {
+	// positions          // colors           // texture coords for img 0/1
+	0.08f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+	0.08f, -0.1f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.08, -0.1f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.08f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
+
 float deepTexCoord2[] = { // deep的第二張圖座標不同
 	0.1f, 1.0f,// top right
 	0.1f, 0.75f,// bottom right
 	0.0f, 0.75f,// bottom left
 	0.0f, 1.0f// top left
 };
+
 unsigned int deepIndices[] = {
 	0, 1, 3, // first triangle
 	1, 2, 3  // second triangle
@@ -223,6 +253,36 @@ unsigned int backIndices[] = {
 	0, 1, 3, // first triangle
 	1, 2, 3  // second triangle
 };
+
+
+//粒子系統
+struct Particle {
+	glm::vec2 Position, Velocity;
+	glm::vec4 Color;
+	GLfloat Life;
+
+	Particle()
+		: Position(0.0f), Velocity(0.0f), Color(1.0f), Life(0.0f) { }
+};
+
+GLuint nr_particles = 500; // particle總數
+std::vector<Particle> particles; // 裝particle的盒子
+GLuint nr_new_particles = 2; // 每次要新增的particle
+GLuint lastUsedParticle = 0; // 給FirstUnusedParticle()使用
+GLuint FirstUnusedParticle();
+void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offset);
+
+GLfloat particle_quad[] = {
+	0.0f, 1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 0.0f, 0.0f,
+
+	0.0f, 1.0f, 0.0f, 1.0f,
+	1.0f, 1.0f, 1.0f, 1.0f,
+	1.0f, 0.0f, 1.0f, 0.0f
+};
+glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(800), static_cast<GLfloat>(600), 0.0f, -1.0f, 1.0f);
+
 
 float position = 0.0;
 float angle = 0.0;
