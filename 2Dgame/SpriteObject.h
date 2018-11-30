@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "../../Include/Common.h"
 #include <Common.h>
 #include "Sprite2D.h"
 

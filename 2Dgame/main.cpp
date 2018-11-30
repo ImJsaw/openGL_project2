@@ -254,12 +254,12 @@ void Jump_Timer(int val) {
 			// currentTime - deltatime : 0 到 time_for_a_jump(1.2)
 			// 180/(time_for_a_jump+0.015) : 讓currentTime - deltatime從0到180(度)，0.015是誤差，計時器和正常時間有偏差
 			if (is_move_when_jump == 1) { // 邊跳邊向右
-				offset = translate(jump_interval * 0.001, 0, 0) * offset;
+				offset = translate(jump_interval * 0.0001, 0, 0) * offset;
 			}
 			else if (is_move_when_jump == 2) { // 邊跳邊向左
-				offset = translate(-jump_interval * 0.001, 0, 0) * offset;
+				offset = translate(-jump_interval * 0.0001, 0, 0) * offset;
 			}
-			offset = translate(0, cos( radian )*0.05, 0) * offset; // 跳躍的矩陣
+			offset = translate(0, cos( radian )*0.07, 0) * offset; // 跳躍的矩陣
 		}
 	}
 	if(deepDirection != -1){//normal move
@@ -322,7 +322,7 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'Q':
 		deepImage = 0;
 		deepy = 4;
-		offsetDeepBloodLength -= 0.1;
+		if (offsetDeepBloodLength > 0) offsetDeepBloodLength -= 0.1;
 		break;
 	case 'e': // 朱利安柱
 	case 'E':

@@ -1,5 +1,4 @@
-//$(SolutionDir)$(Configuration)\
-//$(ProjectDir)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -7,18 +6,12 @@
 #include <map>
 #include <string>
 using namespace std;
-//#include <cmath>
 
 #include "vgl.h"
 #include "LoadShaders.h"
-//Include GLM
-//#include <glm/glm.hpp>
-//#include <glm/gtc/matrix_transform.hpp>
 
-//using namespace glm;
 
 //#define STB_IMAGE_IMPLEMENTATION
-//#include "stb_image.h"
 #include <Common.h>
 
 #include "Sprite2D.h"
@@ -49,10 +42,10 @@ float	deepWalkTime = 0.0f;
 double	deepWalkSpeed = 1.0f;
 
 void	Jump_Timer(int val);
-float	jump_interval = 30;
+float	jump_interval = 20;
 float	currentTime = 0.0f;
 float	deltatime = 0.0f;
-float	time_for_a_jump = 1.2f;
+float	time_for_a_jump = 0.5f;
 int is_move_when_jump; // 0 為 非，1 為 向右，2 為 向左
 
 mat4 translate(float x,float y,float z);
@@ -252,10 +245,10 @@ unsigned int skillIndices[] = {
 //-----------------------
 float deepBloodVertices[] = {
 	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
-	0.1f,  0.02f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-	0.1f, -0.02f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-	-0.1f, -0.02f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-	-0.1f,  0.02f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+	0.05f,  0.01f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+	0.05f, -0.01f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.05f, -0.01f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.05f,  0.01f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
 unsigned int deepBloodIndices[] = {
 	0, 1, 3, // first triangle

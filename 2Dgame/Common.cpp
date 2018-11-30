@@ -1,4 +1,3 @@
-//#include "../Include/Common.h"
 #include <Common.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -53,7 +52,6 @@ bool Common::CheckShaderCompiled(GLuint shader)
 
 		return false;
 	}
-
 	return true;
 }
 
@@ -83,7 +81,6 @@ bool Common::CheckFrameBufferStatus()
 		printf("FBO error: %d\n", fboStatus);
 		return false;
 	}
-
 	return true;
 }
 
