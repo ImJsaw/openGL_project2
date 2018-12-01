@@ -15,7 +15,7 @@ uniform float life;
 
 void main()
 {
-    float scale = 1/(life+0.1);
+    float scale = 1/(life+0.5);
     TexCoords = aTexCoord;
     ParticleColor = color;
     //gl_Position = projection * vec4((aPos.xy * scale) + offset, 0.0, 1.0);

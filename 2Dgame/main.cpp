@@ -1168,8 +1168,8 @@ GLuint FirstUnusedParticle()
 void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offsett)
 {
 	//GLfloat random = ((rand() % 100) - 50) / 10.0f;
-	GLfloat random = ((rand() % 100) - 50) / 1000.0f;
-	GLfloat random2 = ((rand() % 100) - 80) / 1000.0f;
+	GLfloat random = ((rand() % 100) - 99) / 5000.0f;
+	GLfloat random2 = ((rand() % 100) - 99) / 5000.0f;
 	GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
 	//particle.Position = charPos + random + offsett; // 主角位置 + 隨機 + 主角半徑
 	particle.Position = vec2(charPos.x + random, charPos.y + random2);

@@ -282,7 +282,7 @@ struct Particle {
 		: Position(0.0f), Velocity(0.0f), Color(1.0f), Life(0.0f) { }
 };
 
-GLuint nr_particles = 500; // particle總數
+GLuint nr_particles = 5000; // particle總數
 std::vector<Particle> particles; // 裝particle的盒子
 GLuint nr_new_particles = 2; // 每次要新增的particle
 GLuint lastUsedParticle = 0; // 給FirstUnusedParticle()使用

@@ -11,7 +11,7 @@ void main()
 		discard;
 	}
     color = (texture(sprite, TexCoords) * ParticleColor);
-	color *= vec4(cos(time), sin(time), cos(time), 1.0);
-	//color = texture(sprite, TexCoords);
+	//color += vec4(cos(time), sin(time), cos(time), 1.0);
+	
 
 }  
