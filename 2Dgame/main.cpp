@@ -909,10 +909,78 @@ void init() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);*/
+
+	//------------------------------------------------------------
+	//framebuffer zone : 將螢幕畫面取下，經過後製特效，再傳回的方式
+	//------------------------------------------------------------
+	ShaderInfo shaderframe[] = {
+		{ GL_VERTEX_SHADER, "framebuffer.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "framebuffer.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programFrame = LoadShaders(shaderframe);//讀取shader
+
+	glUseProgram(programFrame);//uniform參數數值前必須先use shader
+
+	// screen quad VAO
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+
+
+	glUseProgram(programFrame);
+	glUniform1i(glGetUniformLocation(programFrame, "screenTexture"), 0);
+
+	// framebuffer configuration
+	// -------------------------
+	
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	// create a color attachment texture
+
+	glGenTextures(1, &textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+	// create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+																								  // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//pNoID = glGetUniformLocation(programFrame, "mode");
+	//lenID = glGetUniformLocation(programFrame, "len");
+	//frametimeID = glGetUniformLocation(programFrame, "time");
+
 }
 
 void display() {
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+
+	//--------------------------------------------
+	//把東西畫到framebuffer上
+	//--------------------------------------------
+
+	//glUniform1i(pNoID, pNo);
+	//glUniform1f(lenID, sin(rotateAngle*1.0f) / 100.0f);
+	//glUniform1f(frametimeID, rotateAngle);
+
+	// bind to framebuffer and draw scene as we normally would to color texture 
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	//glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
+	//不可以用，會畫不出東西
+
+
+
+	//-------------------------------------------
+	//夾心餅乾，夾在framebuffer中間
+	//-------------------------------------------
+	//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//-----------------------
@@ -1097,6 +1165,66 @@ void display() {
 	glUseProgram(programDeepBlood);
 	glBindVertexArray(VAOdb);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+	//------------------------------------
+	//framebufferobject--mainmap(因為原本畫在自己的framebuffer，回到原本的buffer)
+	//-----------------------------------
+
+
+	// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+							  // clear all relevant buffers
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (really necessery actually, since we will be able to see behind the quad anyways)
+	glClear(GL_COLOR_BUFFER_BIT); // 先清空主要buffer的存的pixel顏色
+
+	glUseProgram(programFrame);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices1), &quadVertices1, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	//screenShader.use();
+	glUseProgram(programFrame);
+	glBindVertexArray(quadVAO);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+
+	//------------------------------------
+	//framebufferobject--mipmap
+	//-----------------------------------
+	
+
+	// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
+							  // clear all relevant buffers
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (really necessery actually, since we will be able to see behind the quad anyways)
+	//glClear(GL_COLOR_BUFFER_BIT);
+	
+	glUseProgram(programFrame);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices2), &quadVertices2, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	//screenShader.use();
+	glUseProgram(programFrame);
+	glBindVertexArray(quadVAO);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+
 
 
 	glFlush();//強制執行上次的OpenGL commands

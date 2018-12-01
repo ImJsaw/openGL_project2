@@ -81,11 +81,18 @@ GLuint VAOp;
 GLuint VBOp;
 GLuint EBOp;
 
+GLuint quadVAO;
+GLuint quadVBO;
+unsigned int framebuffer; // 這三個buffer是要做整張畫面的特效使用
+unsigned int textureColorbuffer;
+unsigned int rbo;
+
 unsigned int programDeep; // deep-program
 unsigned int programSkill; // deep-program
 unsigned int programDeepBlood;
 unsigned int programBack;
 unsigned int programParticle;
+unsigned int programFrame;
 
 
 int pNo;
@@ -312,6 +319,35 @@ unsigned int particleIndices[] = {
 glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
 glm::vec4 deepPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 GLfloat dt = jump_interval * 0.001;
+
+//--------------------------------------
+//framebufferobject小地圖
+//--------------------------------------
+float quadVertices2[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// 小地圖：右上-0.5,1.0：右下-0.5,0.5：左下-1.0,0.5：左上-1.0,1.0
+	// positions   // texCoords
+	-1.0,   1.0,  0.0f, 1.0f, // 左上
+	-1.0,   0.5,  0.0f, 0.0f, // 左下
+	-0.5,   0.5,  1.0f, 0.0f, // 右下
+
+	-1.0f,  1.0f,  0.0f, 1.0f, // 左上
+	-0.5,   0.5,  1.0f, 0.0f, // 右下
+	-0.5,   1.0,  1.0f, 1.0f // 右上
+};
+float quadVertices1[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions   // texCoords
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	1.0f, -1.0f,  1.0f, 0.0f,
+
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	1.0f, -1.0f,  1.0f, 0.0f,
+	1.0f,  1.0f,  1.0f, 1.0f
+};
+
+
+
+
 
 //-------------------------------------------
 //yao-chih-yuan code
