@@ -28,8 +28,13 @@ void ChangeSize(int w,int h);
 void display();
 void Keyboard(unsigned char key, int x, int y);
 void Keyboardup(unsigned char key, int x, int y);
-void Keyboard2(unsigned char key, int x, int y);
-void Keyboardup2(unsigned char key, int x, int y);
+void MenuEvents(int option);
+void ParticleMenuEvents(int option);
+
+void ParticleNumMenuEvents(int option);
+void ParticleSpeedMenuEvents(int option);
+void ParticleDirectionMenuEvents(int option);
+void ParticleLifeMenuEvents(int option);
 
 void	Deep_Timer(int val);
 float	deep_interval = 60;
@@ -54,8 +59,6 @@ mat4 rotate(float angle,float x,float y,float z);
 
 //the function for the skybox
 unsigned int loadTexture(char const * path);
-unsigned int loadCubemap(vector<std::string> faces);
-
 
 bool isFrame;
 GLint isMotionSwitch; // 轉換動作時藉此讓他先設為0，不會讓動作轉換時繼承上一秒的動作
@@ -282,7 +285,11 @@ struct Particle {
 		: Position(0.0f), Velocity(0.0f), Color(1.0f), Life(0.0f) { }
 };
 
-GLuint nr_particles = 5000; // particle總數
+float particleLife, particleSpeed;
+
+GLuint particleNum = 500; // particle總數
+GLuint particleDir = 5000; 
+
 std::vector<Particle> particles; // 裝particle的盒子
 GLuint nr_new_particles = 2; // 每次要新增的particle
 GLuint lastUsedParticle = 0; // 給FirstUnusedParticle()使用

@@ -18,9 +18,5 @@ void main()
     float scale = 1/(life+0.5);
     TexCoords = aTexCoord;
     ParticleColor = color;
-    //gl_Position = projection * vec4((aPos.xy * scale) + offset, 0.0, 1.0);
 	gl_Position = vec4((aPos.xy * scale) + offset, 0.0, 1.0);
-	//gl_Position = vec4((vertex.xy), 0.0, 1.0);
-	//gl_Position = projection * offsetMat * vec4((aPos.xy * scale), 0.0, 1.0);
-	//gl_Position = vec4(aPos.x - 1.0, aPos.y, aPos.z, 1.0);
 }
