@@ -80,6 +80,12 @@
     <None Include="point_sprite.vp">
       <Filter>shader</Filter>
     </None>
+    <None Include="framebuffer.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="framebuffer.fp">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="shader">

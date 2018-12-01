@@ -110,6 +110,8 @@
     <None Include="deepblood.vp" />
     <None Include="deepskill.fp" />
     <None Include="deepskill.vp" />
+    <None Include="framebuffer.fp" />
+    <None Include="framebuffer.vp" />
     <None Include="particle.fp" />
     <None Include="particle.vp" />
     <None Include="point_sprite.fp" />
