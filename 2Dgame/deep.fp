@@ -21,13 +21,6 @@ vec2 iResolution = vec2(800., 600.);
 void main()
 {    
 	
-	/*if(texture(tex, vec3(TexCoord, (deep_y-1) * 10 + (deep_x-1))).a < 0.1){
-		discard;
-	}
-	FragColor = texture(tex, vec3(TexCoord, (deep_y-1) * 10 + (deep_x-1)));*/
-	
-
-
 	// obtain normal from normal map in range [0,1]
     vec3 normal = texture(normalMap, vec3(TexCoord, (deep_y-1) * 10 + (deep_x-1))).rgb;
     // transform normal vector to range [-1,1]

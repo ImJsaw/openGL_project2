@@ -39,7 +39,7 @@ void ParticleLifeMenuEvents(int option);
 void	Deep_Timer(int val);
 float	deep_interval = 60;
 float	deepTime = 0.0f;
-double	deepSpeed = 1.0f;
+float	deepSpeed = 1.0f;
 
 void Deep_Walk_Timer(int val);
 float	deep_walk_interval = 80;
@@ -47,7 +47,7 @@ float	deepWalkTime = 0.0f;
 double	deepWalkSpeed = 1.0f;
 
 void	Jump_Timer(int val);
-float	jump_interval = 20;
+float	jump_interval = 30;
 float	currentTime = 0.0f;
 float	deltatime = 0.0f;
 float	time_for_a_jump = 0.5f;
@@ -232,7 +232,7 @@ float deepVertices[] = {
 	// positions          // colors           // texture coords for img 0/1
 	0.1f,  0.12f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
 	0.1f, -0.12f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-	-0.1, -0.12f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.1f, -0.12f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
 	-0.1f,  0.12f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
 
@@ -247,6 +247,8 @@ unsigned int deepIndices[] = {
 	0, 1, 3, // first triangle
 	1, 2, 3  // second triangle
 };
+
+float deepPosX = 0, deepPosY = 0;
 
 //-----------------------
 // skill-vertices
@@ -314,7 +316,7 @@ struct Particle {
 float particleLife, particleSpeed;
 
 GLuint particleNum = 500; // particle羆计
-GLuint particleDir = 5000; 
+vec2 particleDir = vec2(1.0,1.0); 
 
 std::vector<Particle> particles; // 杆particle舶
 GLuint nr_new_particles = 2; // –Ω璶穝糤particle
@@ -344,6 +346,7 @@ unsigned int particleIndices[] = {
 };
 glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
 glm::vec4 deepPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
 GLfloat dt = jump_interval * 0.001;
 //----------------------------------------
 //采╰参獴(learn opengl code)
@@ -353,19 +356,20 @@ GLuint particleRainNum = 2000; // particle羆计
 GLuint particleRainImg;
 void RespawnParticleRain(Particle &particle);
 
+
 //--------------------------------------
 //framebufferobject瓜
 //--------------------------------------
 float quadVertices2[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// 瓜-0.5,1.0-0.5,0.5オ-1.0,0.5オ-1.0,1.0
 	// positions   // texCoords
-	-1.0,   1.0,  0.0f, 1.0f, // オ
-	-1.0,   0.5,  0.0f, 0.0f, // オ
-	-0.5,   0.5,  1.0f, 0.0f, // 
+	0.5,   1.0,  0.0f, 1.0f, // オ
+	0.5,   0.5,  0.0f, 0.0f, // オ
+	1.0,   0.5,  1.0f, 0.0f, // 
 
-	-1.0f,  1.0f,  0.0f, 1.0f, // オ
-	-0.5,   0.5,  1.0f, 0.0f, // 
-	-0.5,   1.0,  1.0f, 1.0f // 
+	0.5,  1.0f,  0.0f, 1.0f, // オ
+	1,   0.5,  1.0f, 0.0f, // 
+	1,   1.0,  1.0f, 1.0f // 
 };
 float quadVertices1[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// positions   // texCoords
@@ -379,12 +383,6 @@ float quadVertices1[] = { // vertex attributes for a quad that fills the entire 
 };
 
 
-
-
-
-//-------------------------------------------
-//yao-chih-yuan code
-//-------------------------------------------
 static unsigned int seed = 0x13371337;
 enum
 {
@@ -432,7 +430,7 @@ GLuint cubemapTexture;
 int action;
 int xMove, yMove;
 
-#define DOR(angle) (angle*3.1415/180);
+#define DOR(angle) (angle*3.1415f/180);
 
 mat4 translate(float x, float y, float z) {
 	vec4 t = vec4(x, y, z, 1);//w = 1 ,玥x,y,z=0translate
@@ -451,7 +449,7 @@ mat4 scale(float x, float y, float z) {
 	return M;
 }
 mat4 rotate(float angle, float x, float y, float z) {
-	float r = DOR(angle);
+	double r = DOR(angle);
 	mat4 M = mat4(1);
 
 	vec4 c1 = vec4(cos(r) + (1 - cos(r))*x*x, (1 - cos(r))*y*x + sin(r)*z, (1 - cos(r))*z*x - sin(r)*y, 0);

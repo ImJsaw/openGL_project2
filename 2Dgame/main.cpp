@@ -36,7 +36,7 @@ int main(int argc, char** argv){
 	int ParticleNumMenu, ParticleSpeedMenu, ParticleDirectionMenu, ParticleLifeMenu;
 
 
-	int ParticleMenu, ModeMenu, ShaderMenu, BackgroundMenu;
+	int ParticleMenu;
 
 	ParticleNumMenu = glutCreateMenu(ParticleNumMenuEvents);//建立右鍵菜單
 	glutAddMenuEntry("500", 0);
@@ -50,16 +50,16 @@ int main(int argc, char** argv){
 	glutAddMenuEntry("1000", 3);
 
 	ParticleDirectionMenu = glutCreateMenu(ParticleDirectionMenuEvents);//建立右鍵菜單
-	glutAddMenuEntry("up", 0);
-	glutAddMenuEntry("left", 1);
-	glutAddMenuEntry("down", 2);
-	glutAddMenuEntry("right", 3);
+	glutAddMenuEntry("left-down", 0);// 順時針
+	glutAddMenuEntry("left-up", 1);
+	glutAddMenuEntry("right-up", 2);
+	glutAddMenuEntry("right-down", 3);
 
 	ParticleLifeMenu = glutCreateMenu(ParticleLifeMenuEvents);//建立右鍵菜單
 	glutAddMenuEntry("1", 0);
-	glutAddMenuEntry("5", 1);
-	glutAddMenuEntry("0.1", 2);
-	glutAddMenuEntry("10", 3);
+	glutAddMenuEntry("0.1", 1);
+	glutAddMenuEntry("3", 2);
+	glutAddMenuEntry("5", 3);
 
 
 	ParticleMenu = glutCreateMenu(ParticleMenuEvents);//建立右鍵菜單
@@ -90,11 +90,11 @@ void ChangeSize(int w,int h){
 void Deep_Timer(int val){
 	glutPostRedisplay();
 	glutTimerFunc(deep_interval, Deep_Timer, val);
-	deepTime += deep_interval * deepSpeed * 0.001;
+	deepTime += deep_interval * deepSpeed * 0.001f;
 	
-	//讓燈源左右移動
-	lightPos[0] = sin(deepTime);
-	lightPos[2] = cos(deepTime);
+	
+	lightPos[0] = sin(deepTime);//讓燈源左右移動
+	lightPos[2] = cos(deepTime);//讓燈源前後移動
 
 	//---------------------------------------------
 	//腳色的連續圖(特殊動作)
@@ -103,12 +103,13 @@ void Deep_Timer(int val){
 
 		// 移動圖片deep
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
-			offsetSkill = translate(deep_interval * 0.001, 0, 0) * offsetSkill;
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			offsetSkill = translate(deep_interval * 0.001f, 0, 0) * offsetSkill;
+			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
-			offsetSkill = translate(-deep_interval * 0.001, 0, 0) * offsetSkill;
+			offsetSkill = translate(-deep_interval * 0.001f, 0, 0) * offsetSkill;
+			 if (deepPosX > -1 ) deepPosX -= deep_interval * 0.0005f;
 		}
 
 		// deep連續圖動畫
@@ -131,10 +132,12 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 1 && deepy == 4) { // 一般攻擊(在連續圖的第四行)
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
 		}
 
 		if (deepx == 10) {
@@ -148,10 +151,12 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 1 && deepy == 2) { // 丟東西(圖片1的第二行)
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if(deepPosX < 1)if (deepPosX > -1) deepPosX += deep_interval * 0.0005f;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
 		}
 
 		if (deepx == 8) {
@@ -165,10 +170,12 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 0 && deepy == 4) {
 		if (isLeft == 0) {
-			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
 		}
 		else if (isLeft == 1) {
-			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
 		}
 
 		if (deepx == 6) {
@@ -187,11 +194,11 @@ void Deep_Timer(int val){
 		
 		if (isLeft == 0) {
 			
-			offsetSkill = translate((currentTime-deltatime)*10 * deep_interval * 0.0001, 0, 0) * offsetSkill;
+			offsetSkill = translate((currentTime-deltatime)*10 * deep_interval * 0.0001f, 0, 0) * offsetSkill;
 		}
 		else if (isLeft == 1) {
 			
-			offsetSkill = translate((currentTime - deltatime) * 10 * -deep_interval * 0.0001, 0, 0) * offsetSkill;
+			offsetSkill = translate((currentTime - deltatime) * 10 * -deep_interval * 0.0001f, 0, 0) * offsetSkill;
 		}
 
 		// skill 連續圖動畫
@@ -213,11 +220,11 @@ void Deep_Timer(int val){
 		
 		if (isLeft == 0) {
 
-			offsetSkill = translate(deep_interval * 0.002, 0, 0) * offsetSkill;
+			offsetSkill = translate(deep_interval * 0.002f, 0, 0) * offsetSkill;
 		}
 		else if (isLeft == 1) {
 
-			offsetSkill = translate(-deep_interval * 0.002, 0, 0) * offsetSkill;
+			offsetSkill = translate(-deep_interval * 0.002f, 0, 0) * offsetSkill;
 		}
 
 		// skill 連續圖動畫
@@ -235,8 +242,8 @@ void Deep_Timer(int val){
 		}
 	}
 	else if (drawSkill == 1 && skillImage == 2) { // 朱利安柱子連續圖
-		if (isLeft) offsetSkill = translate(-0.2, 0, 0) * offset;
-		else offsetSkill = translate(-0.2, 0, 0) * offset;
+		if (isLeft) offsetSkill = translate(-0.2f, 0, 0) * offset;
+		else offsetSkill = translate(-0.2f, 0, 0) * offset;
 
 		// skill 連續圖動畫
 		if (skillx == 4 && skilly == 2) {
@@ -256,29 +263,25 @@ void Deep_Timer(int val){
 	//---------------------------------------------
 	//血條動畫
 	//---------------------------------------------
-	offsetDeepBlood = translate(0, 0.16, 0) * offset;
+	offsetDeepBlood = translate(0, 0.16f, 0) * offset;
 	
 }
 
 void Deep_Walk_Timer(int val) {
 	glutPostRedisplay();
 	glutTimerFunc(deep_walk_interval, Deep_Walk_Timer, val);
-	deepWalkTime += deep_walk_interval * 0.001;
-	/*if (deepDirection != -1) {//normal move
-		offset = translate(deep_walk_interval * 0.0001* xMove, deep_walk_interval * 0.0001* yMove, 0) * offset;
-		deepx++;
-		if (deepx == 8) deepx = 3;
-	}*/
+	deepWalkTime += deep_walk_interval * 0.001f;
 }
 
 void Jump_Timer(int val) {
 
 	glutPostRedisplay();
 	glutTimerFunc(jump_interval, Jump_Timer, val);
-	currentTime += jump_interval * 0.001; 
+	currentTime += jump_interval * 0.001f; 
 
-	
-
+	//----------------------------------------
+	// 跳起的位移和動畫連續圖
+	//----------------------------------------
 	// jump_interval 為 30 時，最接近正常每秒的速度
 	if (deepController == 3 || deepController == 7) { // 跳起到著地的時間
 		if ((currentTime - deltatime) >= time_for_a_jump) { // 要著地了，看向哪一方
@@ -290,23 +293,37 @@ void Jump_Timer(int val) {
 			else if (deepController == 7) {
 				deepController = 4; // 著地後，看向左方
 			}
+
+			deepx = 1;
+			deepy = 1;
+			deepImage = 0;
 		}
-		else if ((currentTime - deltatime) < time_for_a_jump) {
-			float radian = DOR((currentTime - deltatime) * (180 / (time_for_a_jump+0.017)));
+		else if ((currentTime - deltatime) < time_for_a_jump) { 
+			float radian = DOR((currentTime - deltatime) * (180 / (time_for_a_jump+0.017f)));
 			// currentTime - deltatime : 0 到 time_for_a_jump(1.2)
 			// 180/(time_for_a_jump+0.015) : 讓currentTime - deltatime從0到180(度)，0.015是誤差，計時器和正常時間有偏差
 			if (is_move_when_jump == 1) { // 邊跳邊向右
-				offset = translate(jump_interval * 0.0001, 0, 0) * offset;
+				//offset = translate(jump_interval * 0.0001f, 0, 0) * offset;
+				deepPosX += deep_interval * 0.0001f;
 			}
 			else if (is_move_when_jump == 2) { // 邊跳邊向左
-				offset = translate(-jump_interval * 0.0001, 0, 0) * offset;
+				//offset = translate(-jump_interval * 0.0001f, 0, 0) * offset;
+				deepPosX -= deep_interval * 0.0001f;
 			}
-			offset = translate(0, cos( radian )*0.07, 0) * offset; // 跳躍的矩陣
+			//offset = translate(0, cos( radian )*0.07f, 0) * offset; // 跳躍的矩陣
+			deepPosY += cos(radian)*0.07f;
+
+			if (deepx != 4) {
+				deepx++;
+			}
 		}
 	}
 	if(deepDirection != -1){//normal move
-		offset = translate(jump_interval * 0.001* xMove, jump_interval * 0.001* yMove, 0) * offset;
+		//offset = translate(jump_interval * 0.001f* xMove, jump_interval * 0.001f* yMove, 0) * offset;
+		if(deepPosX < 1 && deepPosX > -1) deepPosX += jump_interval * 0.001f* xMove;
+		if (deepPosY < 0 && deepPosY > -1) deepPosY += jump_interval * 0.001f* yMove;
 		deepx++;
+		if (deepPosY > 0 && deepController != 7) deepPosY = -0.01;
 		if (deepx == 8) deepx = 3;
 	}
 
@@ -332,6 +349,8 @@ void Jump_Timer(int val) {
 		if (p.Life > 0.0f){	// particle is alive, thus update
 			p.Position -= p.Velocity;
 			p.Color.a -= dt * 2.5;
+			
+			p.Color.a -= dt * 2.5f;
 		}
 	}
 
@@ -367,7 +386,7 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'Q':
 		deepImage = 0;
 		deepy = 4;
-		if (offsetDeepBloodLength > 0) offsetDeepBloodLength -= 0.1;
+		if (offsetDeepBloodLength > 0) offsetDeepBloodLength -= 0.1f;
 		break;
 	case 'e': // 朱利安柱
 	case 'E':
@@ -385,8 +404,8 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 		deepy = 4;
 
 		skillImage = 1; // 劍氣圖片
-		if (isLeft) offsetSkill = translate(-0.4, 0, 0) * offset;
-		else offsetSkill = translate(0.4, 0, 0) * offset;
+		if (isLeft) offsetSkill = translate(-0.4f, 0, 0) * offset;
+		else offsetSkill = translate(0.4f, 0, 0) * offset;
 		drawSkill = 1;
 
 		break;
@@ -394,8 +413,8 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'X':
 		deepImage = 2;
 		skillImage = 0;
-		if(isLeft) offsetSkill = translate(-0.1, 0, 0) * offset;
-		else offsetSkill = translate(0.1, 0, 0) * offset;
+		if(isLeft) offsetSkill = translate(-0.1f, 0, 0) * offset;
+		else offsetSkill = translate(0.1f, 0, 0) * offset;
 		drawSkill = 1;
 
 		deltatime = currentTime;
@@ -419,7 +438,10 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 			deltatime = currentTime;
 			deepController = 7; // 換成向左跳躍的圖
 		}
-		 // 跳躍
+		deepx = 1;
+		deepy = 7;
+		deepImage = 0;
+		
 		break;
 	case 'W': // 往上走
 	case 'w':
@@ -531,11 +553,14 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 void init() {
 	particleLife = 1.0f;
 	particleSpeed = 0.1f;
+
+	deepPosX = 0;
+	deepPosY = -0.2f;
 	//-----------------------
 	// deep-setting
 	//-----------------------
 	deepController = 0; // 向右站立
-	offset = translate(-0.9, 0, 0); // 初始化矩陣，只有腳色的矩陣translate到螢幕左邊
+	offset = translate(-0.9f, 0, 0); // 初始化矩陣，只有腳色的矩陣translate到螢幕左邊
 	deepx = 1; // 貼圖座標移動矩陣
 	deepy = 1;
 	xMove = 0;
@@ -642,8 +667,8 @@ void init() {
 	for (int y = -2; y <= 2; y++)
 	{
 		glm::vec2 translation;
-		translation.x = abs(y * 0.1);
-		translation.y = y * 0.1;
+		translation.x = abs(y * 0.1f);
+		translation.y = y * 0.1f;
 		dragonOffset[index++] = translation;
 	}
 	// --------------------------------------
@@ -662,7 +687,7 @@ void init() {
 	for (int x = -6; x <= 6; x+=3)
 	{
 		glm::vec2 translation;
-		translation.x = x * 0.1;
+		translation.x = x * 0.1f;
 		translation.y = 0;
 		columnOffset[index2++] = translation;
 	}
@@ -760,7 +785,7 @@ void init() {
 	//----------------------------
 	//deepblood setting
 	//---------------------------
-	offsetDeepBlood = translate(0, 0.16, 0);
+	offsetDeepBlood = translate(0, 0.16f, 0);
 	offsetDeepBloodLength = 1;
 
 	ShaderInfo deepBloodShader[] = {
@@ -1062,6 +1087,7 @@ void init() {
 
 void display() {
 
+
 	//---------------------------------
 	//先畫在我的frambuffer上
 	//---------------------------------
@@ -1069,6 +1095,9 @@ void display() {
 
 
 
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	//-------------------------------------------
 	//夾心餅乾，夾在framebuffer中間
 	//-------------------------------------------
 	//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -1086,6 +1115,7 @@ void display() {
 	glUseProgram(programBack);
 	glBindVertexArray(VAOb);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 
 
 	/*//---------------------------------------
@@ -1124,7 +1154,7 @@ void display() {
 	glDisable(GL_BLEND);
 	glDisable(GL_PROGRAM_POINT_SIZE);*/
 	// -----------------------
-	//deep-particle draw
+	//rain-particle draw
 	// -----------------------
 	// Use additive blending to give it a 'glow' effect
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -1147,6 +1177,14 @@ void display() {
 	// Don't forget to reset to default blending mode
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+
+
+	//update pos
+	if (deepPosX > 1) deepPosX = 0.99;
+	if (deepPosX < -1) deepPosX = -0.99;
+	if (deepPosY < -1) deepPosY = -0.99;
+	offset = translate(deepPosX, deepPosY, 0);
+	cout << deepPosX << " , " << deepPosY<< endl;
 
 	
 	//-----------------------
@@ -1198,14 +1236,15 @@ void display() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glUseProgram(programParticle);
 	glBindVertexArray(VAOp);
-	for (Particle particle : particles){
-		if (particle.Life > 0.0f){
-			glUniform2fv(offsetParticleID, 1, &particle.Position[0]);
-			glUniform4fv(colorParticleID, 1, &particle.Color[0]);
+	
+	for (int i = 0; i < particleNum; i++) {
+		if (particles[i].Life > 0.0f) {
+			glUniform2fv(offsetParticleID, 1, &particles[i].Position[0]);
+			glUniform4fv(colorParticleID, 1, &particles[i].Color[0]);
 			glUniformMatrix4fv(projectionID, 1, false, &projection[0][0]);
 			glUniformMatrix4fv(offsetParticleMatrixID, 1, false, &offsetParticle[0][0]);
 			glUniform1f(particleTimeID, currentTime);
-			glUniform1f(particleLifeID, particle.Life);
+			glUniform1f(particleLifeID, particles[i].Life);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, particleImg);
 			glBindVertexArray(VAOp);
@@ -1365,13 +1404,15 @@ void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offsett)
 	//GLfloat random = ((rand() % 100) - 50) / 10.0f;
 	GLfloat random = ((rand() % 100) - 99) / 5000.0f;
 	GLfloat random2 = ((rand() % 100) - 99) / 5000.0f;
-	GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
+	GLfloat rColor = 0.5f + ((rand() % 100) / 100.0f);
 	//particle.Position = charPos + random + offsett; // 主角位置 + 隨機 + 主角半徑
 	particle.Position = vec2(charPos.x + random, charPos.y + random2);
 	offsetParticle = translate(particle.Position.x, particle.Position.y, 0.0) * offsetParticle;
 	particle.Color = glm::vec4(rColor, rColor, rColor, 1.0f);
 	particle.Life = particleLife;
 	particle.Velocity = vec2(dt, dt) * particleSpeed;
+	particle.Velocity = vec2(particle.Velocity.x * particleDir.x, particle.Velocity.y * particleDir.y);
+	
 	//printf("%d , %d\n", particle.Position.x, particle.Position.y);
 }
 
@@ -1418,10 +1459,10 @@ void ParticleSpeedMenuEvents(int option) {
 		particleSpeed = 0.1f;
 		break;
 	case 1:
-		particleSpeed = 0.5f;
+		particleSpeed = 0.05f;
 		break;
 	case 2:
-		particleSpeed = 0.01f;
+		particleSpeed = 0.5f;
 		break;
 	case 3:
 		particleSpeed = 1.0f;
@@ -1432,12 +1473,16 @@ void ParticleSpeedMenuEvents(int option) {
 void ParticleDirectionMenuEvents(int option) {
 	switch (option) {
 	case 0:
+		particleDir = vec2(1.0, 1.0);
 		break;
 	case 1:
+		particleDir = vec2(1.0, -1.0);
 		break;
 	case 2:
+		particleDir = vec2(-1.0, -1.0);
 		break;
 	case 3:
+		particleDir = vec2(-1.0, 1.0);
 		break;
 	}
 }
@@ -1447,13 +1492,13 @@ void ParticleLifeMenuEvents(int option) {
 		particleLife = 1.0f;
 		break;
 	case 1:
-		particleLife = 5.0f;
-		break;
-	case 2:
 		particleLife = 0.1f;
 		break;
+	case 2:
+		particleLife = 3.0f;
+		break;
 	case 3:
-		particleLife = 10.0f;
+		particleLife = 5.0f;
 		break;
 	}
 	cout << "particleLife : " << particleLife << endl;
