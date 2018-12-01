@@ -39,7 +39,7 @@ void ParticleLifeMenuEvents(int option);
 void	Deep_Timer(int val);
 float	deep_interval = 60;
 float	deepTime = 0.0f;
-double	deepSpeed = 1.0f;
+float	deepSpeed = 1.0f;
 
 void Deep_Walk_Timer(int val);
 float	deep_walk_interval = 80;
@@ -213,7 +213,7 @@ float deepVertices[] = {
 	// positions          // colors           // texture coords for img 0/1
 	0.1f,  0.12f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
 	0.1f, -0.12f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-	-0.1, -0.12f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.1f, -0.12f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
 	-0.1f,  0.12f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f
 };
 
@@ -325,7 +325,7 @@ unsigned int particleIndices[] = {
 };
 glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
 glm::vec4 deepPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-GLfloat dt = jump_interval * 0.001;
+GLfloat dt = jump_interval * 0.001f;
 
 //--------------------------------------
 //framebufferobject小地圖
@@ -333,13 +333,13 @@ GLfloat dt = jump_interval * 0.001;
 float quadVertices2[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// 小地圖：右上-0.5,1.0：右下-0.5,0.5：左下-1.0,0.5：左上-1.0,1.0
 	// positions   // texCoords
-	-1.0,   1.0,  0.0f, 1.0f, // 左上
-	-1.0,   0.5,  0.0f, 0.0f, // 左下
-	-0.5,   0.5,  1.0f, 0.0f, // 右下
+	0.5,   1.0,  0.0f, 1.0f, // 左上
+	0.5,   0.5,  0.0f, 0.0f, // 左下
+	1.0,   0.5,  1.0f, 0.0f, // 右下
 
-	-1.0f,  1.0f,  0.0f, 1.0f, // 左上
-	-0.5,   0.5,  1.0f, 0.0f, // 右下
-	-0.5,   1.0,  1.0f, 1.0f // 右上
+	0.5,  1.0f,  0.0f, 1.0f, // 左上
+	1,   0.5,  1.0f, 0.0f, // 右下
+	1,   1.0,  1.0f, 1.0f // 右上
 };
 float quadVertices1[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// positions   // texCoords
@@ -353,12 +353,6 @@ float quadVertices1[] = { // vertex attributes for a quad that fills the entire 
 };
 
 
-
-
-
-//-------------------------------------------
-//yao-chih-yuan code
-//-------------------------------------------
 static unsigned int seed = 0x13371337;
 enum
 {
@@ -389,7 +383,7 @@ GLuint cubemapTexture;
 int action;
 int xMove, yMove;
 
-#define DOR(angle) (angle*3.1415/180);
+#define DOR(angle) (angle*3.1415f/180);
 
 mat4 translate(float x, float y, float z) {
 	vec4 t = vec4(x, y, z, 1);//w = 1 ,則x,y,z=0時也能translate
@@ -408,7 +402,7 @@ mat4 scale(float x, float y, float z) {
 	return M;
 }
 mat4 rotate(float angle, float x, float y, float z) {
-	float r = DOR(angle);
+	double r = DOR(angle);
 	mat4 M = mat4(1);
 
 	vec4 c1 = vec4(cos(r) + (1 - cos(r))*x*x, (1 - cos(r))*y*x + sin(r)*z, (1 - cos(r))*z*x - sin(r)*y, 0);

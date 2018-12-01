@@ -36,7 +36,7 @@ int main(int argc, char** argv){
 	int ParticleNumMenu, ParticleSpeedMenu, ParticleDirectionMenu, ParticleLifeMenu;
 
 
-	int ParticleMenu, ModeMenu, ShaderMenu, BackgroundMenu;
+	int ParticleMenu;
 
 	ParticleNumMenu = glutCreateMenu(ParticleNumMenuEvents);//建立右鍵菜單
 	glutAddMenuEntry("500", 0);
@@ -90,7 +90,7 @@ void ChangeSize(int w,int h){
 void Deep_Timer(int val){
 	glutPostRedisplay();
 	glutTimerFunc(deep_interval, Deep_Timer, val);
-	deepTime += deep_interval * deepSpeed * 0.001;
+	deepTime += deep_interval * deepSpeed * 0.001f;
 	
 	//讓燈源左右移動
 	lightPos[0] = sin(deepTime);
@@ -103,12 +103,12 @@ void Deep_Timer(int val){
 
 		// 移動圖片deep
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
-			offsetSkill = translate(deep_interval * 0.001, 0, 0) * offsetSkill;
+			offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			offsetSkill = translate(deep_interval * 0.001f, 0, 0) * offsetSkill;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
-			offsetSkill = translate(-deep_interval * 0.001, 0, 0) * offsetSkill;
+			offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			offsetSkill = translate(-deep_interval * 0.001f, 0, 0) * offsetSkill;
 		}
 
 		// deep連續圖動畫
@@ -131,10 +131,10 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 1 && deepy == 4) { // 一般攻擊(在連續圖的第四行)
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+			offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+			offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
 		}
 
 		if (deepx == 10) {
@@ -148,10 +148,10 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 1 && deepy == 2) { // 丟東西(圖片1的第二行)
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+			offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+			offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
 		}
 
 		if (deepx == 8) {
@@ -165,10 +165,10 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 0 && deepy == 4) {
 		if (isLeft == 0) {
-			offset = translate(-deep_interval * 0.0005, 0, 0) * offset;
+			offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
 		}
 		else if (isLeft == 1) {
-			offset = translate(deep_interval * 0.0005, 0, 0) * offset;
+			offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
 		}
 
 		if (deepx == 6) {
@@ -187,11 +187,11 @@ void Deep_Timer(int val){
 		
 		if (isLeft == 0) {
 			
-			offsetSkill = translate((currentTime-deltatime)*10 * deep_interval * 0.0001, 0, 0) * offsetSkill;
+			offsetSkill = translate((currentTime-deltatime)*10 * deep_interval * 0.0001f, 0, 0) * offsetSkill;
 		}
 		else if (isLeft == 1) {
 			
-			offsetSkill = translate((currentTime - deltatime) * 10 * -deep_interval * 0.0001, 0, 0) * offsetSkill;
+			offsetSkill = translate((currentTime - deltatime) * 10 * -deep_interval * 0.0001f, 0, 0) * offsetSkill;
 		}
 
 		// skill 連續圖動畫
@@ -213,11 +213,11 @@ void Deep_Timer(int val){
 		
 		if (isLeft == 0) {
 
-			offsetSkill = translate(deep_interval * 0.002, 0, 0) * offsetSkill;
+			offsetSkill = translate(deep_interval * 0.002f, 0, 0) * offsetSkill;
 		}
 		else if (isLeft == 1) {
 
-			offsetSkill = translate(-deep_interval * 0.002, 0, 0) * offsetSkill;
+			offsetSkill = translate(-deep_interval * 0.002f, 0, 0) * offsetSkill;
 		}
 
 		// skill 連續圖動畫
@@ -235,8 +235,8 @@ void Deep_Timer(int val){
 		}
 	}
 	else if (drawSkill == 1 && skillImage == 2) { // 朱利安柱子連續圖
-		if (isLeft) offsetSkill = translate(-0.2, 0, 0) * offset;
-		else offsetSkill = translate(-0.2, 0, 0) * offset;
+		if (isLeft) offsetSkill = translate(-0.2f, 0, 0) * offset;
+		else offsetSkill = translate(-0.2f, 0, 0) * offset;
 
 		// skill 連續圖動畫
 		if (skillx == 4 && skilly == 2) {
@@ -256,14 +256,14 @@ void Deep_Timer(int val){
 	//---------------------------------------------
 	//血條動畫
 	//---------------------------------------------
-	offsetDeepBlood = translate(0, 0.16, 0) * offset;
+	offsetDeepBlood = translate(0, 0.16f, 0) * offset;
 	
 }
 
 void Deep_Walk_Timer(int val) {
 	glutPostRedisplay();
 	glutTimerFunc(deep_walk_interval, Deep_Walk_Timer, val);
-	deepWalkTime += deep_walk_interval * 0.001;
+	deepWalkTime += deep_walk_interval * 0.001f;
 	/*if (deepDirection != -1) {//normal move
 		offset = translate(deep_walk_interval * 0.0001* xMove, deep_walk_interval * 0.0001* yMove, 0) * offset;
 		deepx++;
@@ -275,7 +275,7 @@ void Jump_Timer(int val) {
 
 	glutPostRedisplay();
 	glutTimerFunc(jump_interval, Jump_Timer, val);
-	currentTime += jump_interval * 0.001; 
+	currentTime += jump_interval * 0.001f; 
 
 	
 
@@ -292,20 +292,20 @@ void Jump_Timer(int val) {
 			}
 		}
 		else if ((currentTime - deltatime) < time_for_a_jump) {
-			float radian = DOR((currentTime - deltatime) * (180 / (time_for_a_jump+0.017)));
+			float radian = DOR((currentTime - deltatime) * (180 / (time_for_a_jump+0.017f)));
 			// currentTime - deltatime : 0 到 time_for_a_jump(1.2)
 			// 180/(time_for_a_jump+0.015) : 讓currentTime - deltatime從0到180(度)，0.015是誤差，計時器和正常時間有偏差
 			if (is_move_when_jump == 1) { // 邊跳邊向右
-				offset = translate(jump_interval * 0.0001, 0, 0) * offset;
+				offset = translate(jump_interval * 0.0001f, 0, 0) * offset;
 			}
 			else if (is_move_when_jump == 2) { // 邊跳邊向左
-				offset = translate(-jump_interval * 0.0001, 0, 0) * offset;
+				offset = translate(-jump_interval * 0.0001f, 0, 0) * offset;
 			}
-			offset = translate(0, cos( radian )*0.07, 0) * offset; // 跳躍的矩陣
+			offset = translate(0, cos( radian )*0.07f, 0) * offset; // 跳躍的矩陣
 		}
 	}
 	if(deepDirection != -1){//normal move
-		offset = translate(jump_interval * 0.001* xMove, jump_interval * 0.001* yMove, 0) * offset;
+		offset = translate(jump_interval * 0.001f* xMove, jump_interval * 0.001f* yMove, 0) * offset;
 		deepx++;
 		if (deepx == 8) deepx = 3;
 	}
@@ -331,7 +331,7 @@ void Jump_Timer(int val) {
 		p.Life -= dt; // reduce life
 		if (p.Life > 0.0f){	// particle is alive, thus update
 			p.Position -= p.Velocity * dt;
-			p.Color.a -= dt * 2.5;
+			p.Color.a -= dt * 2.5f;
 		}
 	}
 
@@ -345,7 +345,7 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'Q':
 		deepImage = 0;
 		deepy = 4;
-		if (offsetDeepBloodLength > 0) offsetDeepBloodLength -= 0.1;
+		if (offsetDeepBloodLength > 0) offsetDeepBloodLength -= 0.1f;
 		break;
 	case 'e': // 朱利安柱
 	case 'E':
@@ -363,8 +363,8 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 		deepy = 4;
 
 		skillImage = 1; // 劍氣圖片
-		if (isLeft) offsetSkill = translate(-0.4, 0, 0) * offset;
-		else offsetSkill = translate(0.4, 0, 0) * offset;
+		if (isLeft) offsetSkill = translate(-0.4f, 0, 0) * offset;
+		else offsetSkill = translate(0.4f, 0, 0) * offset;
 		drawSkill = 1;
 
 		break;
@@ -372,8 +372,8 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 	case 'X':
 		deepImage = 2;
 		skillImage = 0;
-		if(isLeft) offsetSkill = translate(-0.1, 0, 0) * offset;
-		else offsetSkill = translate(0.1, 0, 0) * offset;
+		if(isLeft) offsetSkill = translate(-0.1f, 0, 0) * offset;
+		else offsetSkill = translate(0.1f, 0, 0) * offset;
 		drawSkill = 1;
 
 		deltatime = currentTime;
@@ -513,7 +513,7 @@ void init() {
 	// deep-setting
 	//-----------------------
 	deepController = 0; // 向右站立
-	offset = translate(-0.9, 0, 0); // 初始化矩陣，只有腳色的矩陣translate到螢幕左邊
+	offset = translate(-0.9f, 0, 0); // 初始化矩陣，只有腳色的矩陣translate到螢幕左邊
 	deepx = 1; // 貼圖座標移動矩陣
 	deepy = 1;
 	xMove = 0;
@@ -620,8 +620,8 @@ void init() {
 	for (int y = -2; y <= 2; y++)
 	{
 		glm::vec2 translation;
-		translation.x = abs(y * 0.1);
-		translation.y = y * 0.1;
+		translation.x = abs(y * 0.1f);
+		translation.y = y * 0.1f;
 		dragonOffset[index++] = translation;
 	}
 	// --------------------------------------
@@ -640,7 +640,7 @@ void init() {
 	for (int x = -6; x <= 6; x+=3)
 	{
 		glm::vec2 translation;
-		translation.x = x * 0.1;
+		translation.x = x * 0.1f;
 		translation.y = 0;
 		columnOffset[index2++] = translation;
 	}
@@ -738,7 +738,7 @@ void init() {
 	//----------------------------
 	//deepblood setting
 	//---------------------------
-	offsetDeepBlood = translate(0, 0.16, 0);
+	offsetDeepBlood = translate(0, 0.16f, 0);
 	offsetDeepBloodLength = 1;
 
 	ShaderInfo deepBloodShader[] = {
@@ -918,9 +918,7 @@ void init() {
 }
 
 void display() {
-
-
-
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	//-------------------------------------------
 	//夾心餅乾，夾在framebuffer中間
 	//-------------------------------------------
@@ -1156,7 +1154,7 @@ void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offsett)
 	//GLfloat random = ((rand() % 100) - 50) / 10.0f;
 	GLfloat random = ((rand() % 100) - 99) / 5000.0f;
 	GLfloat random2 = ((rand() % 100) - 99) / 5000.0f;
-	GLfloat rColor = 0.5 + ((rand() % 100) / 100.0f);
+	GLfloat rColor = 0.5f + ((rand() % 100) / 100.0f);
 	//particle.Position = charPos + random + offsett; // 主角位置 + 隨機 + 主角半徑
 	particle.Position = vec2(charPos.x + random, charPos.y + random2);
 	offsetParticle = translate(particle.Position.x, particle.Position.y, 0.0) * offsetParticle;
