@@ -229,6 +229,8 @@ unsigned int deepIndices[] = {
 	1, 2, 3  // second triangle
 };
 
+float deepPosX = 0, deepPosY = 0;
+
 //-----------------------
 // skill-vertices
 //-----------------------

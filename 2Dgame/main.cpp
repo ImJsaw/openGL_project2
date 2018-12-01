@@ -103,12 +103,13 @@ void Deep_Timer(int val){
 
 		// 移動圖片deep
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
 			offsetSkill = translate(deep_interval * 0.001f, 0, 0) * offsetSkill;
+			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
 			offsetSkill = translate(-deep_interval * 0.001f, 0, 0) * offsetSkill;
+			 if (deepPosX > -1 ) deepPosX -= deep_interval * 0.0005f;
 		}
 
 		// deep連續圖動畫
@@ -131,10 +132,12 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 1 && deepy == 4) { // 一般攻擊(在連續圖的第四行)
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
 		}
 
 		if (deepx == 10) {
@@ -148,10 +151,12 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 1 && deepy == 2) { // 丟東西(圖片1的第二行)
 		if (isLeft == 0) {
-			offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if(deepPosX < 1)if (deepPosX > -1) deepPosX += deep_interval * 0.0005f;
 		}
 		else if (isLeft == 1) {
-			offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
 		}
 
 		if (deepx == 8) {
@@ -165,10 +170,12 @@ void Deep_Timer(int val){
 	}
 	else if (deepImage == 0 && deepy == 4) {
 		if (isLeft == 0) {
-			offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
 		}
 		else if (isLeft == 1) {
-			offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
 		}
 
 		if (deepx == 6) {
@@ -264,11 +271,6 @@ void Deep_Walk_Timer(int val) {
 	glutPostRedisplay();
 	glutTimerFunc(deep_walk_interval, Deep_Walk_Timer, val);
 	deepWalkTime += deep_walk_interval * 0.001f;
-	/*if (deepDirection != -1) {//normal move
-		offset = translate(deep_walk_interval * 0.0001* xMove, deep_walk_interval * 0.0001* yMove, 0) * offset;
-		deepx++;
-		if (deepx == 8) deepx = 3;
-	}*/
 }
 
 void Jump_Timer(int val) {
@@ -296,17 +298,23 @@ void Jump_Timer(int val) {
 			// currentTime - deltatime : 0 到 time_for_a_jump(1.2)
 			// 180/(time_for_a_jump+0.015) : 讓currentTime - deltatime從0到180(度)，0.015是誤差，計時器和正常時間有偏差
 			if (is_move_when_jump == 1) { // 邊跳邊向右
-				offset = translate(jump_interval * 0.0001f, 0, 0) * offset;
+				//offset = translate(jump_interval * 0.0001f, 0, 0) * offset;
+				deepPosX += deep_interval * 0.0001f;
 			}
 			else if (is_move_when_jump == 2) { // 邊跳邊向左
-				offset = translate(-jump_interval * 0.0001f, 0, 0) * offset;
+				//offset = translate(-jump_interval * 0.0001f, 0, 0) * offset;
+				deepPosX -= deep_interval * 0.0001f;
 			}
-			offset = translate(0, cos( radian )*0.07f, 0) * offset; // 跳躍的矩陣
+			//offset = translate(0, cos( radian )*0.07f, 0) * offset; // 跳躍的矩陣
+			deepPosY += cos(radian)*0.07f;
 		}
 	}
 	if(deepDirection != -1){//normal move
-		offset = translate(jump_interval * 0.001f* xMove, jump_interval * 0.001f* yMove, 0) * offset;
+		//offset = translate(jump_interval * 0.001f* xMove, jump_interval * 0.001f* yMove, 0) * offset;
+		if(deepPosX < 1 && deepPosX > -1) deepPosX += jump_interval * 0.001f* xMove;
+		if (deepPosY < 0 && deepPosY > -1) deepPosY += jump_interval * 0.001f* yMove;
 		deepx++;
+		if (deepPosY > 0 && deepController != 7) deepPosY = -0.01;
 		if (deepx == 8) deepx = 3;
 	}
 
@@ -509,6 +517,9 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 void init() {
 	particleLife = 1.0f;
 	particleSpeed = 0.1f;
+
+	deepPosX = 0;
+	deepPosY = -0.2f;
 	//-----------------------
 	// deep-setting
 	//-----------------------
@@ -938,6 +949,15 @@ void display() {
 	glBindVertexArray(VAOb);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+	//update pos
+	if (deepPosX > 1) deepPosX = 0.99;
+	if (deepPosX < -1) deepPosX = -0.99;
+	
+	if (deepPosY < -1) deepPosY = -0.99;
+
+
+	offset = translate(deepPosX, deepPosY, 0);
+	cout << deepPosX << " , " << deepPosY<< endl;
 	
 	//-----------------------
 	// skill-draw
