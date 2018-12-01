@@ -2,24 +2,39 @@
 
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec4 color;
+layout(location = 2) in float life;
 
 uniform float time;
 uniform mat4 proj_matrix;
 
 flat out vec4 starColor;
+flat out float lifetime;
 
 void main(void)
 {
 	vec4 newVertex = position;
 
-	newVertex.z += time;
-	newVertex.z = fract(newVertex.z);
+	//newVertex.x -= life; // 可以改變方向
+	//newVertex.x = fract(newVertex.x); // 可以改變速度
+	//newVertex.y -= life;
+	//newVertex.y = 2.0 * fract(newVertex.y); 
 
-	float size = (20.0 * newVertex.z * newVertex.z);
 
-	starColor = smoothstep(1.0, 7.0, size) * color;
 
-	newVertex.z = (999.9 * newVertex.z) - 1000.0;
+	newVertex.x -= time; // 可以改變方向
+	//newVertex.x = fract(newVertex.x); // 可以改變速度
+	newVertex.y -= time;
+	//newVertex.y = 2.0 * fract(newVertex.y);
+
+	//float size = (20.0 * newVertex.x * newVertex.x);
+	float size = 10;
+
+	//starColor = smoothstep(1.0, 7.0, size) * color;
+	starColor = color;
+
+	//newVertex.x = (999.9 * newVertex.x) - 1000.0;
 	gl_Position = proj_matrix * newVertex;
 	gl_PointSize = size;
+	lifetime = life;
 }
+

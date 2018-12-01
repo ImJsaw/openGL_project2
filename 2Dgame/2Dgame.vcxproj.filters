@@ -86,6 +86,12 @@
     <None Include="framebuffer.fp">
       <Filter>shader</Filter>
     </None>
+    <None Include="particle_rain.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="particle_rain.fp">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="shader">

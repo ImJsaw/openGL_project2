@@ -1,0 +1,21 @@
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
+
+out vec2 TexCoords;
+out vec4 ParticleColor;
+
+
+uniform vec2 offset;
+uniform vec4 color;
+uniform float life;
+
+
+void main()
+{
+    float scale = 0.8;
+    TexCoords = aTexCoord;
+    ParticleColor = color;
+	gl_Position = vec4((aPos.xy * scale) + offset, 0.0, 1.0);
+}

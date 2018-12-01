@@ -330,8 +330,30 @@ void Jump_Timer(int val) {
 		// jump_interval * 0.001 是 每一禎的時間差
 		p.Life -= dt; // reduce life
 		if (p.Life > 0.0f){	// particle is alive, thus update
-			p.Position -= p.Velocity * dt;
+			p.Position -= p.Velocity;
 			p.Color.a -= dt * 2.5;
+		}
+	}
+
+	//------------------------------
+	//particle rain zone
+	//-----------------------------
+	// Add new particles
+	for (GLuint i = 0; i < nr_new_particles; ++i)
+	{
+		int unusedParticle = FirstUnusedParticle(); // 找到剛死亡的雨
+		RespawnParticleRain(particleRain[unusedParticle]); // 初始化，讓他起死回生
+	}
+	// Uupdate all particles
+	for (GLuint i = 0; i < particleRainNum; ++i)
+	{
+		Particle &p = particleRain[i];
+		// jump_interval * 0.001 是 每一禎的時間差
+		p.Life -= dt; // reduce life
+		if (p.Life > 0.0f) {	// particle is alive, thus update
+			//p.Position += p.Velocity * dt;
+			p.Position += p.Velocity;
+			p.Color.a -= dt * 1.5;
 		}
 	}
 
@@ -871,6 +893,127 @@ void init() {
 	for (GLuint i = 0; i < particleNum; ++i)
 		particles.push_back(Particle());
 
+
+	/*//--------------------------
+	//particle system(Rain)
+	//--------------------------
+
+	proj_matrix = scale(1, 1, 1);
+
+
+	// debug，記得改shader
+	ShaderInfo particleRainShader[] = {
+		{ GL_VERTEX_SHADER, "point_sprite.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "point_sprite.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programParticleRain = LoadShaders(particleRainShader);//讀取shader
+
+	glUseProgram(programParticleRain);//uniform參數數值前必須先use shader
+
+	glGenVertexArrays(1, &VAOpr);
+	glBindVertexArray(VAOpr);
+
+	proj_location = glGetUniformLocation(programParticleRain, "proj_matrix");
+	time_Loc = glGetUniformLocation(programParticleRain, "time");
+
+	glGenVertexArrays(1, &VAOpr);
+	glBindVertexArray(VAOpr);
+
+	glGenBuffers(1, &VBOpr);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOpr);
+	glBufferData(GL_ARRAY_BUFFER, NUM_STARS * sizeof(star_t), NULL, GL_STATIC_DRAW);
+
+	star = (star_t *)glMapBufferRange(GL_ARRAY_BUFFER, 0, NUM_STARS * sizeof(star_t), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	int i;
+
+	for (i = 0; i < NUM_STARS; i++)
+	{
+		star[i].position[0] = (random_float() * 2.0f);
+		star[i].position[1] = (random_float() * 2.0f);
+		printf("star = %f %f\n", star[i].position[0], star[i].position[1]);
+		star[i].position[2] = 0.0f;
+		star[i].color[0] = 0.8f + random_float() * 0.2f;
+		star[i].color[1] = 0.8f + random_float() * 0.2f;
+		star[i].color[2] = 0.8f + random_float() * 0.2f;
+		star[i].life = (random_float() + 1); // 1-2
+		
+	}
+
+
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(star_t), NULL);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(star_t), (void *)sizeof(glm::vec3));
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(star_t), (void *)(2 * sizeof(glm::vec3)));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	TextureData tdata = Common::Load_png("sys/star.png");
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glGenTextures(1, &m_texture);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tdata.width, tdata.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tdata.data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);*/
+
+	//--------------------------
+	//particle system(rain--by learn opengl)
+	//--------------------------
+	// debug，記得改shader
+	ShaderInfo particleShaderRain2[] = {
+		{ GL_VERTEX_SHADER, "particle_rain.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "particle_rain.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programParticleRain2 = LoadShaders(particleShaderRain2);//讀取shader
+
+	glUseProgram(programParticleRain2);//uniform參數數值前必須先use shader
+
+	glGenVertexArrays(1, &VAOpr2);
+	glGenBuffers(1, &VBOpr2);
+	glGenBuffers(1, &EBOpr2);
+	glBindVertexArray(VAOpr2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOpr2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(particleVertices), particleVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOpr2);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(backIndices), backIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord attribute(for image1)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glUseProgram(programParticleRain2);
+
+	particleRainImg = loadTexture("sys/star.png");
+
+	glUniform1i(glGetUniformLocation(programParticleRain2, "sprite"), 0);
+
+	offsetParticleRainID = glGetUniformLocation(programParticleRain2, "offset"); // particle的位置
+	colorParticleRainID = glGetUniformLocation(programParticleRain2, "color");
+	particleTimeRainID = glGetUniformLocation(programParticleRain2, "time");
+	particleLifeRainID = glGetUniformLocation(programParticleRain2, "life");
+
+	for (GLuint i = 0; i < particleRainNum; ++i)
+		particleRain.push_back(Particle());
+
+
+
 	//------------------------------------------------------------
 	//framebuffer zone : 將螢幕畫面取下，經過後製特效，再傳回的方式
 	//------------------------------------------------------------
@@ -919,9 +1062,13 @@ void init() {
 
 void display() {
 
+	//---------------------------------
+	//先畫在我的frambuffer上
+	//---------------------------------
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
 
-	//-------------------------------------------
+
 	//夾心餅乾，夾在framebuffer中間
 	//-------------------------------------------
 	//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -939,6 +1086,67 @@ void display() {
 	glUseProgram(programBack);
 	glBindVertexArray(VAOb);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+	/*//---------------------------------------
+	//rain particle
+	//---------------------------------------
+	glUseProgram(programParticleRain);
+	currentTimeStar = currentTime;
+	deltaTimeStar = (currentTimeStar - lastTime) * 0.001;
+	lastTime = currentTimeStar;
+
+	glUseProgram(programParticleRain);
+	
+	float f_timer_cnt = glutGet(GLUT_ELAPSED_TIME);
+	float currentTiming = f_timer_cnt * 0.001f;
+
+	currentTiming *= 0.1f;
+	//currentTiming -= floor(currentTiming); // 0, -0.9, -0.8, ..., -0.1, 0
+
+
+
+	glUniform1f(time_Loc, currentTiming);
+	glUniformMatrix4fv(proj_location, 1, GL_FALSE, &proj_matrix[0][0]);
+
+	glEnable(GL_POINT_SPRITE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBindVertexArray(VAOpr);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glEnable(GL_PROGRAM_POINT_SIZE);
+
+	glDrawArrays(GL_POINTS, 0, NUM_STARS);
+	
+	glDisable(GL_POINT_SPRITE);
+	glDisable(GL_BLEND);
+	glDisable(GL_PROGRAM_POINT_SIZE);*/
+	// -----------------------
+	//deep-particle draw
+	// -----------------------
+	// Use additive blending to give it a 'glow' effect
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glUseProgram(programParticleRain2);
+	glBindVertexArray(VAOpr2);
+	for (Particle particle : particleRain) {
+		if (particle.Life > 0.0f) {
+			glUniform2fv(offsetParticleRainID, 1, &particle.Position[0]);
+			glUniform4fv(colorParticleRainID, 1, &particle.Color[0]);
+			glUniform1f(particleTimeRainID, currentTime);
+			glUniform1f(particleLifeRainID, particle.Life);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, particleRainImg);
+			glBindVertexArray(VAOpr2);
+			glUseProgram(programParticleRain2);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
+	}
+	// Don't forget to reset to default blending mode
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
 	
 	//-----------------------
@@ -1130,6 +1338,7 @@ void display() {
 	glutSwapBuffers();//調換前台和後台buffer ,當後臺buffer畫完和前台buffer交換使我們看見它
 }
 
+// learn-opengl tail particle
 GLuint FirstUnusedParticle()
 {
 	// Search from last used particle, this will usually return almost instantly
@@ -1166,6 +1375,17 @@ void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offsett)
 	//printf("%d , %d\n", particle.Position.x, particle.Position.y);
 }
 
+void RespawnParticleRain(Particle &particle)
+{
+	
+	particle.Position = vec2(random_float() * 2 - 1, random_float()); // -1~1 (起始位置)
+	particle.Color = vec4(1.0);
+	particle.Life = random_float() * 2 + 2; // 2-4(生命週期)
+	particle.Velocity = vec2(-dt, -dt); // (速度和方向)
+}
+
+
+// yao-chih-yuan rain
 static inline float random_float(){
 	float res;
 	unsigned int tmp;

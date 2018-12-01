@@ -84,6 +84,14 @@ GLuint VAOp;
 GLuint VBOp;
 GLuint EBOp;
 
+GLuint VAOpr;
+GLuint VBOpr;
+GLuint EBOpr;
+
+GLuint VAOpr2;
+GLuint VBOpr2;
+GLuint EBOpr2;
+
 GLuint quadVAO;
 GLuint quadVBO;
 unsigned int framebuffer; // 這三個buffer是要做整張畫面的特效使用
@@ -95,6 +103,8 @@ unsigned int programSkill; // deep-program
 unsigned int programDeepBlood;
 unsigned int programBack;
 unsigned int programParticle;
+unsigned int programParticleRain;
+unsigned int programParticleRain2;
 unsigned int programFrame;
 
 
@@ -147,6 +157,15 @@ GLuint projectionID;
 GLuint offsetParticleMatrixID;
 GLuint particleTimeID;
 GLuint particleLifeID;
+
+//-------------------------------
+//particle-rain-shader ID
+//-------------------------------
+GLuint offsetParticleRainID;
+GLuint colorParticleRainID;
+GLuint particleTimeRainID;
+GLuint particleLifeRainID;
+
 
 //-----------------------
 // deep-variables
@@ -326,6 +345,13 @@ unsigned int particleIndices[] = {
 glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
 glm::vec4 deepPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 GLfloat dt = jump_interval * 0.001;
+//----------------------------------------
+//粒子系統下雨(learn opengl code)
+//----------------------------------------
+std::vector<Particle> particleRain; // 裝particle的盒子
+GLuint particleRainNum = 2000; // particle總數
+GLuint particleRainImg;
+void RespawnParticleRain(Particle &particle);
 
 //--------------------------------------
 //framebufferobject小地圖
@@ -364,8 +390,25 @@ enum
 {
 	NUM_STARS = 1000
 };
+struct star_t
+{
+	glm::vec3     position;
+	glm::vec3     color;
+	GLfloat       life;
+};
+star_t * star;
 static inline float random_float();
+GLuint starLife[NUM_STARS];
 GLuint m_texture;
+GLuint proj_location;
+GLuint time_Loc;
+mat4 proj_matrix;
+
+GLfloat currentTimeStar;
+GLfloat lastTime;
+GLfloat deltaTimeStar;
+
+
 
 float position = 0.0;
 float angle = 0.0;
