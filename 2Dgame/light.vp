@@ -12,6 +12,6 @@ void main()
 		gl_PointSize = 1 / (abs(lightPos.x) + 0.2) * 10;
 	}
 	
-    gl_Position = vec4(lightPos, 1.0);
+    gl_Position = vec4(lightPos.x, lightPos.y + 0.8, lightPos.z, 1.0);
 	pos = lightPos;
 }

@@ -23,11 +23,14 @@ GLfloat SCR_HEIGHT = 600;
 
 
 void init();
+void initDeep();
+
 
 void ChangeSize(int w,int h);
 void display();
 void Keyboard(unsigned char key, int x, int y);
 void Keyboardup(unsigned char key, int x, int y);
+
 void MenuEvents(int option);
 void ParticleMenuEvents(int option);
 
@@ -41,17 +44,12 @@ float	deep_interval = 60;
 float	deepTime = 0.0f;
 float	deepSpeed = 1.0f;
 
-void Deep_Walk_Timer(int val);
-float	deep_walk_interval = 80;
-float	deepWalkTime = 0.0f;
-double	deepWalkSpeed = 1.0f;
-
 void	Jump_Timer(int val);
 float	jump_interval = 30;
 float	currentTime = 0.0f;
 float	deltatime = 0.0f;
 float	time_for_a_jump = 0.5f;
-int is_move_when_jump; // 0 為 非，1 為 向右，2 為 向左
+int is_move_when_jump_deep; // 0 為 非，1 為 向右，2 為 向左
 
 mat4 translate(float x,float y,float z);
 mat4 scale(float x,float y,float z);
@@ -63,7 +61,9 @@ unsigned int loadTexture(char const * path);
 bool isFrame;
 GLint isMotionSwitch; // 轉換動作時藉此讓他先設為0，不會讓動作轉換時繼承上一秒的動作
 
-
+//----------------------------
+// deep, skill, blood
+//----------------------------
 GLuint VAO; // for deep
 GLuint VBO;
 GLuint EBO;
@@ -76,6 +76,9 @@ GLuint VAOdb;
 GLuint VBOdb;
 GLuint EBOdb;
 
+//----------------------------
+// background, particle(deep), particle(rain)
+//----------------------------
 GLuint VAOb;
 GLuint VBOb;
 GLuint EBOb;
@@ -101,10 +104,12 @@ unsigned int rbo;
 unsigned int programDeep; // deep-program
 unsigned int programSkill; // deep-program
 unsigned int programDeepBlood;
+
 unsigned int programBack;
 unsigned int programParticle;
 unsigned int programParticleRain;
 unsigned int programParticleRain2;
+
 unsigned int programFrame;
 unsigned int programLight;
 
@@ -112,14 +117,14 @@ unsigned int programLight;
 int pNo;
 int mode;
 GLuint modeID;
-GLuint timeID;
+GLuint timeDeepID;
 
 //-----------------------
 // deep-shader ID 位址
 //-----------------------
 GLuint deepController;
 GLuint deepcontrollerID;
-GLuint offsetID;
+GLuint offsetDeepID;
 GLuint deepxID;
 GLuint deepyID;
 GLuint isLeftID;
@@ -128,7 +133,6 @@ GLuint projectionDeepID;
 GLuint viewDeepID;
 GLuint viewPosDeepID;
 GLuint lightPosDeepID;
-
 //-----------------------
 // skill-shader ID 位址
 //-----------------------
@@ -138,17 +142,19 @@ GLuint skillyID;
 GLuint isLeftSkillID;
 GLuint skillImageID;
 GLuint skillTimeID;
-
 //-----------------------
 // deepBlood-shader ID 位址
 //-----------------------
 GLuint offsetDeepBloodID;
 GLuint offsetDeepBloodLengthID;
 
+
+
+
+
 //-----------------------
 // background-shader ID 位址
 //-----------------------
-
 //-----------------------
 // particle-shader ID 位址
 //-----------------------
@@ -158,7 +164,6 @@ GLuint projectionID;
 GLuint offsetParticleMatrixID;
 GLuint particleTimeID;
 GLuint particleLifeID;
-
 //-------------------------------
 //particle-rain-shader ID
 //-------------------------------
@@ -166,21 +171,21 @@ GLuint offsetParticleRainID;
 GLuint colorParticleRainID;
 GLuint particleTimeRainID;
 GLuint particleLifeRainID;
-
 //-------------------------------
 //framebuffer-shader ID
 //-------------------------------
 GLuint frameColorID;
-
 //-------------------------------
 //light-shader ID
 //-------------------------------
 GLuint lightPosID;
 
+
+
 //-----------------------
 // deep-variables
 //-----------------------
-mat4 offset; // deep移動
+mat4 offsetDeep; // deep移動
 int deepx; // 移動貼圖座標
 int deepy; // 移動貼圖座標
 int deep_0; // 圖片1
@@ -189,7 +194,7 @@ int deep_2;
 Sprite2D* deepSheets[3];
 Sprite2D* deepNormalSheets[3];
 int objectCount = 3;
-int isLeft; // 是不是左邊
+int isLeftDeep; // 是不是左邊
 int deepDirection; // 左上右下
 int isDeepDie = 0;
 int isDeepShine = 0;
@@ -199,17 +204,17 @@ int deepImage;
 // skill-variables
 //-----------------------
 
-mat4 offsetSkill;
-int skillx;
-int skilly;
+mat4 offsetDeepSkill;
+int deepSkillx;
+int deepSkilly;
 int twinsflame; // 冰火刀流圖片
 int firedragon; // 紅龍在飛
 int juliancolumn; // 紫色柱子
 Sprite2D* deepSkillSheets[3];
 glm::vec2 dragonOffset[5];
 glm::vec2 columnOffset[5];
-int skillImage;
-int drawSkill;
+int deepSkillImage;
+int drawSkillDeep;
 
 //-----------------------
 // deep-blood-variables
@@ -467,7 +472,7 @@ GLuint cubemapTexture;
 
 //int mode;
 int action;
-int xMove, yMove;
+int xMoveDeep, yMoveDeep;
 
 #define DOR(angle) (angle*3.1415f/180);
 

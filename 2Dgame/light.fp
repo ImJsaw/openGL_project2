@@ -10,7 +10,7 @@ void main()
 		FragColor = texture(sprite ,gl_PointCoord);
 	}
 	else{
-		FragColor = texture(sprite ,gl_PointCoord) + vec4(0.5, 0.5, 0.5, 0.0); // set alle 4 vector values to 1.0
+		FragColor = texture(sprite ,gl_PointCoord) + vec4(1.0 , 1.0, 0.0, 0.0); // set alle 4 vector values to 1.0
 	}
     
 }
