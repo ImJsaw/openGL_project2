@@ -168,20 +168,26 @@ void Deep_Timer(int val){
 			deepx++;
 		}
 	}
-	else if (deepImage == 0 && deepy == 4) {
-		if (isLeft == 0) {
+	else if (deepImage == 0 && deepy == 4 && isDeepDie == 0) { // 扣血
+		if (isLeft == 0 && deltatime + 0.2 >= deepTime) {
 			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
 			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
 		}
-		else if (isLeft == 1) {
+		else if (isLeft == 1 && deltatime + 0.2 >= deepTime) {
 			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
 			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
 		}
 
 		if (deepx == 6) {
-			deepImage = 0; // 換回圖片0
-			deepx = 1; // 回到靜止圖
-			deepy = 1;
+			if (offsetDeepBloodLength <= 0.0) { // 已死亡，跳出這個被打到的動畫
+				isDeepDie = 1;
+			}
+			else if(offsetDeepBloodLength >= 0.0 && deltatime + 1.2 <= deepTime){ // 還沒死，但要躺在地上一下
+				deepImage = 0; // 換回圖片0
+				deepx = 1; // 回到靜止圖
+				deepy = 1;
+				
+			}
 		}
 		else if (deepx != 6) { // deepx 往右走
 			deepx++;
@@ -263,7 +269,7 @@ void Deep_Timer(int val){
 	//---------------------------------------------
 	//血條動畫
 	//---------------------------------------------
-	offsetDeepBlood = translate(0, 0.16f, 0) * offset;
+	offsetDeepBlood = translate(0, 0.16f, 0) * offset; // 讓血條一直待在deep上方
 	
 }
 
@@ -327,7 +333,9 @@ void Jump_Timer(int val) {
 		if (deepx == 8) deepx = 3;
 	}
 
-	//update pos
+	//------------------------------------
+	//update pos and set the boundary
+	//------------------------------------
 	if (deepPosX > 1) deepPosX = 0.99;
 	if (deepPosX < -1) deepPosX = -0.99;
 	if (deepPosY < -0.89) deepPosY = -0.89;
@@ -388,122 +396,128 @@ void Jump_Timer(int val) {
 //  deepController : 跳7,走65,站4:左   右:0站,12走,3跳
 // deepDirection : 0左 1上 2右 3下
 void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
-	switch (key) {
-	case 'q': // 扣血
-	case 'Q':
-		deepImage = 0;
-		deepy = 4;
-		if (offsetDeepBloodLength > 0) offsetDeepBloodLength -= 0.1f;
-		break;
-	case 'e': // 朱利安柱
-	case 'E':
-		deepImage = 1;
-		deepy = 2;
-		skillImage = 2; // 朱利安柱子圖片
-		if (isLeft) offsetSkill = offset;
-		else offsetSkill = offset;
-		deltatime = currentTime; // 讓柱子有向外飛的感覺
-		drawSkill = 1;
-		break;
-	case 'z': // 一般攻擊狀態，飛龍特效啟動
-	case 'Z':
-		deepImage = 1;
-		deepy = 4;
+	if (isDeepDie == 0) { // 如果還沒死，按了按鍵才有用
+		switch (key) {
+		case 'q': // 扣血
+		case 'Q':
+			deepImage = 0;
+			deepy = 4;
+			if (offsetDeepBloodLength > 0) offsetDeepBloodLength -= 0.1f;
+			deltatime = deepTime; // 計時開始，到1.2秒後deep才能再站起來
+			break;
+		case 'e': // 朱利安柱
+		case 'E':
+			deepImage = 1;
+			deepy = 2;
+			skillImage = 2; // 朱利安柱子圖片
+			if (isLeft) offsetSkill = offset;
+			else offsetSkill = offset;
+			deltatime = currentTime; // 讓柱子有向外飛的感覺
+			drawSkill = 1;
+			break;
+		case 'z': // 一般攻擊狀態，飛龍特效啟動
+		case 'Z':
+			deepImage = 1;
+			deepy = 4;
 
-		skillImage = 1; // 劍氣圖片
-		if (isLeft) offsetSkill = translate(-0.4f, 0, 0) * offset;
-		else offsetSkill = translate(0.4f, 0, 0) * offset;
-		drawSkill = 1;
+			skillImage = 1; // 劍氣圖片
+			if (isLeft) offsetSkill = translate(-0.4f, 0, 0) * offset;
+			else offsetSkill = translate(0.4f, 0, 0) * offset;
+			drawSkill = 1;
 
-		break;
-	case 'x': // 火焰攻擊狀態，劍氣特效啟動
-	case 'X':
-		deepImage = 2;
-		skillImage = 0;
-		if(isLeft) offsetSkill = translate(-0.1f, 0, 0) * offset;
-		else offsetSkill = translate(0.1f, 0, 0) * offset;
-		drawSkill = 1;
+			break;
+		case 'x': // 火焰攻擊狀態，劍氣特效啟動
+		case 'X':
+			deepImage = 2;
+			skillImage = 0;
+			if (isLeft) offsetSkill = translate(-0.1f, 0, 0) * offset;
+			else offsetSkill = translate(0.1f, 0, 0) * offset;
+			drawSkill = 1;
 
-		deltatime = currentTime;
-
-		break;
-	case 'c': // 跳躍
-	case 'C':
-		if (deepController == 1 || deepController == 0) { // 上一個時刻面向右邊
-			
-			if (deepController == 1) {
-				is_move_when_jump = 1;
-			}
 			deltatime = currentTime;
-			deepController = 3; // 換成向右跳躍的圖
-		}
-		else if(deepController == 5 || deepController == 4){ // 上一個時刻面向左邊
-			
-			if (deepController == 5) {
-				is_move_when_jump = 2;
+
+			break;
+		case 'c': // 跳躍
+		case 'C':
+			if (deepController == 1 || deepController == 0) { // 上一個時刻面向右邊
+
+				if (deepController == 1) {
+					is_move_when_jump = 1;
+				}
+				deltatime = currentTime;
+				deepController = 3; // 換成向右跳躍的圖
 			}
-			deltatime = currentTime;
-			deepController = 7; // 換成向左跳躍的圖
+			else if (deepController == 5 || deepController == 4) { // 上一個時刻面向左邊
+
+				if (deepController == 5) {
+					is_move_when_jump = 2;
+				}
+				deltatime = currentTime;
+				deepController = 7; // 換成向左跳躍的圖
+			}
+			deepx = 1;
+			deepy = 7;
+			deepImage = 0;
+
+			break;
+		case 'W': // 往上走
+		case 'w':
+			deepDirection = 1;
+			yMove++;
+			break;
+		case 'S': // 往下走
+		case 's':
+			deepDirection = 3;
+			yMove--;
+			break;
+		case 'a':
+		case 'A': // 往左走
+			xMove--;
+			if (deepController == 7) { // 上一個時刻向左跳
+				deepController = 7; // 仍然向左
+				is_move_when_jump = 2; // 邊跳邊向左移動
+			}
+			else if (deepController == 3) { // 上一個時刻向右跳
+				deepController = 7; // 改成向左
+				is_move_when_jump = 2; // 邊跳邊向左移動
+			}
+			else {
+				deepController = 5; // 向左走
+				isLeft = 1;
+			}
+			deepDirection = 0;
+			break;
+		case 'd':
+		case 'D':
+			xMove++;
+			if (deepController == 7) { // 上一個時刻向左跳
+				deepController = 3; // 改成向右
+				is_move_when_jump = 1; // 邊跳邊向右移動
+			}
+			else if (deepController == 3) { // 上一個時刻向右跳
+				deepController = 3; // 仍然向右
+				is_move_when_jump = 1; // 邊跳邊向右移動
+			}
+			else {
+				deepController = 1; // 向右走
+				isLeft = 0;
+			}
+			deepDirection = 2;
+			break;
 		}
-		deepx = 1;
-		deepy = 7;
-		deepImage = 0;
-		
-		break;
-	case 'W': // 往上走
-	case 'w':
-		deepDirection = 1;
-		yMove++;
-		break;
-	case 'S': // 往下走
-	case 's':
-		deepDirection = 3;
-		yMove--;
-		break;
-	case 'a':
-	case 'A': // 往左走
-		xMove--;
-		if (deepController == 7) { // 上一個時刻向左跳
-			deepController = 7; // 仍然向左
-			is_move_when_jump = 2; // 邊跳邊向左移動
-		}
-		else if (deepController == 3) { // 上一個時刻向右跳
-			deepController = 7; // 改成向左
-			is_move_when_jump = 2; // 邊跳邊向左移動
-		}
-		else {
-			deepController = 5; // 向左走
-			isLeft = 1;
-		}
-		deepDirection = 0;
-		break;
-	case 'd':
-	case 'D':
-		xMove++;
-		if (deepController == 7) { // 上一個時刻向左跳
-			deepController = 3; // 改成向右
-			is_move_when_jump = 1; // 邊跳邊向右移動
-		}
-		else if (deepController == 3) { // 上一個時刻向右跳
-			deepController = 3; // 仍然向右
-			is_move_when_jump = 1; // 邊跳邊向右移動
-		}
-		else {
-			deepController = 1; // 向右走
-			isLeft = 0;
-		}
-		deepDirection = 2;
-		break;
 	}
+	
 	glutPostRedisplay();
 }
 void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
-	switch (key) {
-		
+
+	if (isDeepDie == 0) {// 如果還沒死，放開按鍵才有用
+		switch (key) {
+
 		case 'W': // 往上走
 		case 'w':
 			yMove--;
-			if(!xMove) deepDirection = -1;
+			if (!xMove) deepDirection = -1;
 			deepx = 3; // 回到站立
 			deepy = 1;
 			break;
@@ -531,7 +545,7 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 				deepy = 1;
 			}
 			if (!yMove) deepDirection = -1;
-			
+
 			break;
 		case 'd':
 		case 'D':
@@ -551,6 +565,7 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 			}
 			if (!yMove) deepDirection = -1;
 			break;
+		}
 	}
 	glutPostRedisplay();
 }
@@ -560,7 +575,7 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 void init() {
 	
 
-	deepPosX = 0;
+	deepPosX = -0.8f;
 	deepPosY = -0.2f;
 	//-----------------------
 	// deep-setting
@@ -768,9 +783,6 @@ void init() {
 
 	glUseProgram(programSkill);
 
-	//twinsflame = loadTexture("sys/twinsflame.png");
-	//firedragon = loadTexture("sys/fire_dragon.png");
-	//juliancolumn = loadTexture("sys/julianColumn.png");
 	for (int spriteID = 0; spriteID < objectCount; ++spriteID)
 	{
 		deepSkillSheets[spriteID] = new Sprite2D();
@@ -1076,7 +1088,6 @@ void init() {
 
 	// framebuffer configuration
 	// -------------------------
-	
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	// create a color attachment texture
@@ -1099,6 +1110,21 @@ void init() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	frameColorID = glGetUniformLocation(programFrame, "color");
+
+	//--------------------------------------------------------
+	//point light zone
+	//--------------------------------------------------------
+	ShaderInfo shaderlight[] = {
+	{ GL_VERTEX_SHADER, "light.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "light.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programLight = LoadShaders(shaderlight);//讀取shader
+
+	glUseProgram(programLight);//uniform參數數值前必須先use shader
+
+	lightPosID = glGetUniformLocation(programLight, "lightPos");
+	lightImg = loadTexture("sys/star.png");
+	glUniform1i(glGetUniformLocation(programLight, "sprite"), 0);
 }
 
 void display() {
@@ -1108,6 +1134,20 @@ void display() {
 	//先畫在我的frambuffer上
 	//---------------------------------
 	
+	if (isDeepDie == 1) {
+		if (frameColor.x > 0.0) {
+			frameColor.x -= 0.005;
+			frameColor.y -= 0.005;
+			frameColor.z -= 0.005;
+		}
+		printf("frameColor.x = %f\n", frameColor.x);
+		
+		glUniform4fv(frameColorID, 1, &frameColor[0]);
+	}
+	else {
+		glUniform4fv(frameColorID, 1, &frameColor[0]);
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
 
@@ -1132,6 +1172,30 @@ void display() {
 	glUseProgram(programBack);
 	glBindVertexArray(VAOb);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	//-----------------------------------
+	//light position draw
+	//-----------------------------------
+	glUseProgram(programLight);
+	
+	glUniform3fv(lightPosID, 1, &lightPos[0]);
+
+	glEnable(GL_POINT_SPRITE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBindVertexArray(VAOpr);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, lightImg);
+	glEnable(GL_PROGRAM_POINT_SIZE);
+
+	glDrawArrays(GL_POINTS, 0, 1);
+
+	glDisable(GL_POINT_SPRITE);
+	glDisable(GL_BLEND);
+	glDisable(GL_PROGRAM_POINT_SIZE);
+
+
 
 
 
@@ -1171,7 +1235,7 @@ void display() {
 	glDisable(GL_BLEND);
 	glDisable(GL_PROGRAM_POINT_SIZE);*/
 	// -----------------------
-	//rain-particle draw
+	// rain-particle draw
 	// -----------------------
 	// Use additive blending to give it a 'glow' effect
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);

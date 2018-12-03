@@ -106,6 +106,7 @@ unsigned int programParticle;
 unsigned int programParticleRain;
 unsigned int programParticleRain2;
 unsigned int programFrame;
+unsigned int programLight;
 
 
 int pNo;
@@ -171,6 +172,11 @@ GLuint particleLifeRainID;
 //-------------------------------
 GLuint frameColorID;
 
+//-------------------------------
+//light-shader ID
+//-------------------------------
+GLuint lightPosID;
+
 //-----------------------
 // deep-variables
 //-----------------------
@@ -185,6 +191,8 @@ Sprite2D* deepNormalSheets[3];
 int objectCount = 3;
 int isLeft; // 是不是左邊
 int deepDirection; // 左上右下
+int isDeepDie = 0;
+int isDeepShine = 0;
 int deepImage;
 
 //-----------------------
@@ -222,6 +230,10 @@ int particleImg;
 mat4 offsetParticle;
 mat4 projectionParticle;
 
+//-----------------------
+//light-variables
+//-----------------------
+int lightImg;
 //-----------------------
 // deep-vertices
 //-----------------------
@@ -404,6 +416,8 @@ float quadVertices1[] = { // vertex attributes for a quad that fills the entire 
 	1.0f, -1.0f,  1.0f, 0.0f,
 	1.0f,  1.0f,  1.0f, 1.0f
 };
+vec4 frameColor = vec4(1.0, 1.0, 1.0, 1.0);
+
 
 //---------------------------------------------
 //yao chih yuan code

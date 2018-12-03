@@ -112,6 +112,8 @@
     <None Include="deepskill.vp" />
     <None Include="framebuffer.fp" />
     <None Include="framebuffer.vp" />
+    <None Include="light.fp" />
+    <None Include="light.vp" />
     <None Include="particle.fp" />
     <None Include="particle.vp" />
     <None Include="particle_rain.fp" />

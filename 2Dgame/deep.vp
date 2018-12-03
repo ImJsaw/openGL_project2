@@ -8,6 +8,7 @@ out vec3 ourColor;
 out vec2 TexCoord;
 out vec3 FragPos;
 
+
 flat out int mariocontroller;
 uniform int mario_controller;
 
@@ -45,4 +46,5 @@ void main()
 	deepImg = deepImage;
 	deep_x = deepx;
 	deep_y = deepy;
+
 }

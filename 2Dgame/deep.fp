@@ -5,6 +5,7 @@ in vec3 ourColor;
 in vec2 TexCoord;
 in vec3 FragPos;
 
+
 flat in int mariocontroller;
 flat in int deepImg;
 flat in int deep_x;
@@ -46,4 +47,9 @@ void main()
     vec3 specular = vec3(0.2) * spec;
     FragColor = vec4(ambient + diffuse + specular, 1.0);
 
+	if(deep_y == 4 && deepImg == 0){ // 在撥放扣血時
+		if(int(time * 15)%2 == 0){ // 乘上的倍數越高(15)，閃速越快
+			FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+		}
+	}
 }

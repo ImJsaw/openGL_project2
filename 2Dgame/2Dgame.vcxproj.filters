@@ -92,6 +92,12 @@
     <None Include="particle_rain.fp">
       <Filter>shader</Filter>
     </None>
+    <None Include="light.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="light.fp">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="shader">
