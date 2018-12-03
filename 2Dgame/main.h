@@ -197,6 +197,7 @@ int skilly;
 int twinsflame; // 冰火刀流圖片
 int firedragon; // 紅龍在飛
 int juliancolumn; // 紫色柱子
+Sprite2D* deepSkillSheets[3];
 glm::vec2 dragonOffset[5];
 glm::vec2 columnOffset[5];
 int skillImage;
@@ -256,7 +257,7 @@ float deepPosX = 0, deepPosY = 0;
 //-----------------------
 // skill-vertices
 //-----------------------
-float skillVertices[] = {
+/*float skillVertices[] = {
 	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
 	0.08f,  0.08f, 0.0f,   1.0f, 0.0f, 0.0f,   0.25f, 1.0f,
 	0.08f, -0.08f, 0.0f,   0.0f, 1.0f, 0.0f,   0.25f, 0.5f,
@@ -267,6 +268,19 @@ float skillVertices2[] = { // 飛龍
 	0.4f,  0.15f, 0.0f,     0.5f, 1.0f, // up-right
 	0.4f, -0.15f, 0.0f,     0.5f, 0.8f, // down-right
 	-0.4f, -0.15f, 0.0f,     0.0f, 0.8f,  // down-left
+	-0.4f,  0.15f, 0.0f,     0.0f, 1.0f   // up-left
+};*/
+float skillVertices[] = {
+	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
+	0.08f,  0.08f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+	0.08f, -0.08f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.08f, -0.08f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.08f,  0.08f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+};
+float skillVertices2[] = { // 飛龍
+	0.4f,  0.15f, 0.0f,     1.0f, 1.0f, // up-right
+	0.4f, -0.15f, 0.0f,     1.0f, 0.0f, // down-right
+	-0.4f, -0.15f, 0.0f,     0.0f, 0.0f,  // down-left
 	-0.4f,  0.15f, 0.0f,     0.0f, 1.0f   // up-left
 };
 unsigned int skillIndices[] = {

@@ -327,6 +327,13 @@ void Jump_Timer(int val) {
 		if (deepx == 8) deepx = 3;
 	}
 
+	//update pos
+	if (deepPosX > 1) deepPosX = 0.99;
+	if (deepPosX < -1) deepPosX = -0.99;
+	if (deepPosY < -0.89) deepPosY = -0.89;
+	offset = translate(deepPosX, deepPosY, 0);
+	cout << "deep Position : " << deepPosX << " , " << deepPosY << endl;
+
 	//------------------------------
 	//particle zone
 	//-----------------------------
@@ -701,7 +708,7 @@ void init() {
 
 
 	// --------------------------------------
-	// normal VAO VBO EBO
+	// 一般的 VAO VBO EBO
 	// --------------------------------------
 	glGenVertexArrays(1, &VAOskill);
 	glGenBuffers(1, &VBOskill);
@@ -761,16 +768,21 @@ void init() {
 
 	glUseProgram(programSkill);
 
-	twinsflame = loadTexture("sys/twinsflame.png");
-	firedragon = loadTexture("sys/fire_dragon.png");
-	juliancolumn = loadTexture("sys/julianColumn.png");
-	//deep_1 = loadTexture("sys/deep_1.png");
-	//deep_2 = loadTexture("sys/deep_2.png");
+	//twinsflame = loadTexture("sys/twinsflame.png");
+	//firedragon = loadTexture("sys/fire_dragon.png");
+	//juliancolumn = loadTexture("sys/julianColumn.png");
+	for (int spriteID = 0; spriteID < objectCount; ++spriteID)
+	{
+		deepSkillSheets[spriteID] = new Sprite2D();
+	}
+	deepSkillSheets[0]->Init("sys/twinsflame.png", 2, 4, 8);
+	deepSkillSheets[1]->Init("sys/fire_dragon.png", 5, 2, 8);
+	deepSkillSheets[2]->Init("sys/julianColumn.png", 2, 4, 8);
 
 	glUniform1i(glGetUniformLocation(programSkill, "twinsflame"), 0);
 	glUniform1i(glGetUniformLocation(programSkill, "firedragon"), 1);
 	glUniform1i(glGetUniformLocation(programSkill, "julianColumn"), 2);
-	//glUniform1i(glGetUniformLocation(programs, "deep_2"), 2);
+
 
 	
 	offsetSkillID = glGetUniformLocation(programSkill, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
@@ -1179,31 +1191,12 @@ void display() {
 			glBindVertexArray(0);
 		}
 	}
-	/*for (Particle particle : particleRain) {
-		if (particle.Life > 0.0f) {
-			glUniform2fv(offsetParticleRainID, 1, &particle.Position[0]);
-			glUniform4fv(colorParticleRainID, 1, &particle.Color[0]);
-			glUniform1f(particleTimeRainID, currentTime);
-			glUniform1f(particleLifeRainID, particle.Life);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, particleRainImg);
-			glBindVertexArray(VAOpr2);
-			glUseProgram(programParticleRain2);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
-		}
-	}*/
 	// Don't forget to reset to default blending mode
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
 
-	//update pos
-	if (deepPosX > 1) deepPosX = 0.99;
-	if (deepPosX < -1) deepPosX = -0.99;
-	if (deepPosY < -1) deepPosY = -0.99;
-	offset = translate(deepPosX, deepPosY, 0);
-	cout << deepPosX << " , " << deepPosY<< endl;
+	
 
 	
 	//-----------------------
@@ -1220,12 +1213,15 @@ void display() {
 	glUniform1f(skillTimeID, currentTime - deltatime);
 	// bind textures on corresponding texture units
 
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, twinsflame);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, firedragon);
+	//glActiveTexture(GL_TEXTURE2);
+	//glBindTexture(GL_TEXTURE_2D, juliancolumn);
+
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, twinsflame);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, firedragon);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, juliancolumn);
+	deepSkillSheets[skillImage]->Enable();
 
 	/*glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, deep_2);*/
@@ -1247,7 +1243,10 @@ void display() {
 			glBindVertexArray(0);
 		}
 	}
-	
+	deepSkillSheets[deepImage]->Disable();
+
+
+
 	// -----------------------
 	//deep-particle draw
 	// -----------------------

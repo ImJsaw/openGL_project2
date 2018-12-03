@@ -5,22 +5,32 @@ in vec3 ourColor;
 in vec2 TexCoord;
 
 flat in int skillImg;
+flat in int skill_x;
+flat in int skill_y;
 
-uniform sampler2D twinsflame;
-uniform sampler2D firedragon;
-uniform sampler2D julianColumn;
+
+//uniform sampler2D twinsflame;
+//uniform sampler2D firedragon;
+//uniform sampler2D julianColumn;
+
+
+
+
+uniform sampler2DArray skillPic;
 
 void main(){    
 	if(skillImg == 0){
-		if(texture(twinsflame, TexCoord).a < 0.1) discard;
-		FragColor = texture(twinsflame, TexCoord);
+		if(texture(skillPic, vec3(TexCoord, 4 * (skill_y-1) + (skill_x-1))).a < 0.1) discard;
+		FragColor = texture(skillPic, vec3( TexCoord, 4 * (skill_y-1) + (skill_x-1) ) );
 	}
 	else if(skillImg == 1){
-		if(texture(firedragon, TexCoord).a < 0.1) discard;
-		FragColor = texture(firedragon, TexCoord);
+		if(texture(skillPic, vec3(TexCoord, 2 * (skill_y-1) + (skill_x-1))).a < 0.1) discard;
+		FragColor = texture(skillPic, vec3(TexCoord, 2 * (skill_y-1) + (skill_x-1)));
 	}
 	else if(skillImg == 2){
-		if(texture(julianColumn, TexCoord).a < 0.1) discard;
-		FragColor = texture(julianColumn, TexCoord);
+		if(texture(skillPic, vec3(TexCoord, 4 * (skill_y-1) + (skill_x-1))).a < 0.1) discard;
+		FragColor = texture(skillPic, vec3(TexCoord, 4 * (skill_y-1) + (skill_x-1)));
 	}
+	
+
 }
