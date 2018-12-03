@@ -360,7 +360,7 @@ void Jump_Timer(int val) {
 	// Add new particles
 	for (GLuint i = 0; i < nr_new_particles; ++i)
 	{
-		int unusedParticle = FirstUnusedParticle(); // 找到剛死亡的雨
+		int unusedParticle = FirstUnusedParticleRain(); // 找到剛死亡的雨
 		RespawnParticleRain(particleRain[unusedParticle]); // 初始化，讓他起死回生
 	}
 	// Uupdate all particles
@@ -551,8 +551,7 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 
 
 void init() {
-	particleLife = 1.0f;
-	particleSpeed = 0.1f;
+	
 
 	deepPosX = 0;
 	deepPosY = -0.2f;
@@ -869,6 +868,8 @@ void init() {
 	//--------------------------
 	//particle system
 	//--------------------------
+	particleLife = 1.0f;
+	particleSpeed = 0.1f;
 
 	offsetParticle = scale(1,1,1);
 
@@ -994,6 +995,9 @@ void init() {
 	//particle system(rain--by learn opengl)
 	//--------------------------
 	// debug，記得改shader
+
+	rainLife = 1;
+	rainSpeed = 1;
 	ShaderInfo particleShaderRain2[] = {
 		{ GL_VERTEX_SHADER, "particle_rain.vp" },//vertex shader
 	{ GL_FRAGMENT_SHADER, "particle_rain.fp" },//fragment shader
@@ -1082,7 +1086,7 @@ void init() {
 		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
+	frameColorID = glGetUniformLocation(programFrame, "color");
 }
 
 void display() {
@@ -1091,6 +1095,7 @@ void display() {
 	//---------------------------------
 	//先畫在我的frambuffer上
 	//---------------------------------
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
 
@@ -1160,7 +1165,21 @@ void display() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glUseProgram(programParticleRain2);
 	glBindVertexArray(VAOpr2);
-	for (Particle particle : particleRain) {
+	for (int i = 0; i < particleRainNum; i++) {
+		if (particleRain[i].Life > 0.0f) {
+			glUniform2fv(offsetParticleRainID, 1, &particleRain[i].Position[0]);
+			glUniform4fv(colorParticleRainID, 1, &particleRain[i].Color[0]);
+			glUniform1f(particleTimeRainID, currentTime);
+			glUniform1f(particleLifeRainID, particleRain[i].Life);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, particleRainImg);
+			glBindVertexArray(VAOpr2);
+			glUseProgram(programParticleRain2);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
+	}
+	/*for (Particle particle : particleRain) {
 		if (particle.Life > 0.0f) {
 			glUniform2fv(offsetParticleRainID, 1, &particle.Position[0]);
 			glUniform4fv(colorParticleRainID, 1, &particle.Color[0]);
@@ -1173,7 +1192,7 @@ void display() {
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 		}
-	}
+	}*/
 	// Don't forget to reset to default blending mode
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1334,6 +1353,9 @@ void display() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
+	
+
+
 	//screenShader.use();
 	glUseProgram(programFrame);
 	glBindVertexArray(quadVAO);
@@ -1416,13 +1438,35 @@ void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offsett)
 	//printf("%d , %d\n", particle.Position.x, particle.Position.y);
 }
 
+GLuint FirstUnusedParticleRain()
+{
+	// Search from last used particle, this will usually return almost instantly
+	for (GLuint i = lastUsedParticleRain; i < particleRainNum; ++i) {
+		if (particleRain[i].Life <= 0.0f) {
+			lastUsedParticleRain = i;
+			return i;
+		}
+	}
+	// Otherwise, do a linear search
+	for (GLuint i = 0; i < lastUsedParticleRain; ++i) {
+		if (particleRain[i].Life <= 0.0f) {
+			lastUsedParticleRain = i;
+			return i;
+		}
+	}
+	// Override first particle if all others are alive
+	lastUsedParticleRain = 0;
+	return 0;
+}
+
 void RespawnParticleRain(Particle &particle)
 {
 	
 	particle.Position = vec2(random_float() * 2 - 1, random_float()); // -1~1 (起始位置)
 	particle.Color = vec4(1.0);
-	particle.Life = random_float() * 2 + 2; // 2-4(生命週期)
-	particle.Velocity = vec2(-dt, -dt); // (速度和方向)
+	particle.Life = (random_float() * 2 + 2) * rainLife; // 2-4(生命週期)
+	particle.Velocity = vec2(-dt, -dt) * rainSpeed; // (速度和方向)
+	particle.Velocity = vec2(particle.Velocity.x * rainDir.x, particle.Velocity.y * rainDir.y);
 }
 
 
@@ -1444,12 +1488,15 @@ void ParticleNumMenuEvents(int option) {
 	switch (option) {
 	case 0:
 		particleNum = 500;
+		particleRainNum = 2000;
 		break;
 	case 1:
 		particleNum = 50;
+		particleRainNum = 200;
 		break;
 	case 2:
 		particleNum = 10;
+		particleRainNum = 40;
 		break;
 	}
 }
@@ -1457,15 +1504,19 @@ void ParticleSpeedMenuEvents(int option) {
 	switch (option) {
 	case 0:
 		particleSpeed = 0.1f;
+		rainSpeed = 1;
 		break;
 	case 1:
 		particleSpeed = 0.05f;
+		rainSpeed = 0.1;
 		break;
 	case 2:
 		particleSpeed = 0.5f;
+		rainSpeed = 5;
 		break;
 	case 3:
 		particleSpeed = 1.0f;
+		rainSpeed = 10;
 		break;
 	}
 	cout << "particleSpeed : " << particleSpeed << endl;
@@ -1474,15 +1525,19 @@ void ParticleDirectionMenuEvents(int option) {
 	switch (option) {
 	case 0:
 		particleDir = vec2(1.0, 1.0);
+		rainDir = vec2(1.0, 1.0);
 		break;
 	case 1:
 		particleDir = vec2(1.0, -1.0);
+		rainDir = vec2(1.0, -1.0);
 		break;
 	case 2:
 		particleDir = vec2(-1.0, -1.0);
+		rainDir = vec2(-1.0, -1.0);
 		break;
 	case 3:
 		particleDir = vec2(-1.0, 1.0);
+		rainDir = vec2(-1.0, 1.0);
 		break;
 	}
 }
@@ -1490,15 +1545,19 @@ void ParticleLifeMenuEvents(int option) {
 	switch (option) {
 	case 0:
 		particleLife = 1.0f;
+		rainLife = 1.0f;
 		break;
 	case 1:
 		particleLife = 0.1f;
+		rainLife = 0.1f;
 		break;
 	case 2:
 		particleLife = 3.0f;
+		rainLife = 3.0f;
 		break;
 	case 3:
 		particleLife = 5.0f;
+		rainLife = 10.0f;
 		break;
 	}
 	cout << "particleLife : " << particleLife << endl;

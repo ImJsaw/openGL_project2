@@ -166,6 +166,10 @@ GLuint colorParticleRainID;
 GLuint particleTimeRainID;
 GLuint particleLifeRainID;
 
+//-------------------------------
+//framebuffer-shader ID
+//-------------------------------
+GLuint frameColorID;
 
 //-----------------------
 // deep-variables
@@ -213,7 +217,6 @@ int backgroundImg;
 //-----------------------
 //particle-variables
 //-----------------------
-
 int particleImg;
 mat4 offsetParticle;
 mat4 projectionParticle;
@@ -348,13 +351,19 @@ glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_
 glm::vec4 deepPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 GLfloat dt = jump_interval * 0.001;
+
 //----------------------------------------
 //采╰参獴(learn opengl code)
 //----------------------------------------
 std::vector<Particle> particleRain; // 杆particle舶
-GLuint particleRainNum = 2000; // particle羆计
-GLuint particleRainImg;
+GLuint lastUsedParticleRain = 0; // 倒FirstUnusedParticle()ㄏノ
+GLuint FirstUnusedParticleRain();
 void RespawnParticleRain(Particle &particle);
+GLuint particleRainNum = 2000; // particle羆计
+float rainLife, rainSpeed;
+vec2 rainDir = vec2(1.0, 1.0);
+GLuint particleRainImg;
+
 
 
 //--------------------------------------
@@ -382,7 +391,9 @@ float quadVertices1[] = { // vertex attributes for a quad that fills the entire 
 	1.0f,  1.0f,  1.0f, 1.0f
 };
 
-
+//---------------------------------------------
+//yao chih yuan code
+//---------------------------------------------
 static unsigned int seed = 0x13371337;
 enum
 {

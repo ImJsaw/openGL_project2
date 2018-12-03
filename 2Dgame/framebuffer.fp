@@ -6,12 +6,12 @@ in vec2 TexCoords;
 uniform sampler2D screenTexture;
 
 //uniform float time;
-
+uniform vec4 color;
 
 
 void main()
 {
     vec3 col = texture(screenTexture, TexCoords).rgb;
-    FragColor = vec4(col, 1.0);
+    FragColor = vec4(col, 1.0) + color;
 
 }
