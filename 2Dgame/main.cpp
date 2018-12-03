@@ -3,6 +3,7 @@
 //vec3 camera = vec3(0,0,20);
 Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+glm::vec3 lightPosForLight(0.0f, 0.0f, 0.0f);
 
 int main(int argc, char** argv){
 	glutInit(&argc, argv);
@@ -95,7 +96,8 @@ void Deep_Timer(int val){
 	
 	lightPos[0] = sin(deepTime);//讓燈源左右移動
 	lightPos[2] = cos(deepTime);//讓燈源前後移動
-
+	lightPosForLight[0] = cos(deepTime);//讓燈源左右移動
+	lightPosForLight[2] = sin(deepTime);//讓燈源前後移動
 	//---------------------------------------------
 	//腳色的連續圖(特殊動作)
 	//---------------------------------------------
@@ -1178,7 +1180,7 @@ void display() {
 	//-----------------------------------
 	glUseProgram(programLight);
 	
-	glUniform3fv(lightPosID, 1, &lightPos[0]);
+	glUniform3fv(lightPosID, 1, &lightPosForLight[0]);
 
 	glEnable(GL_POINT_SPRITE);
 

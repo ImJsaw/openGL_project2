@@ -5,7 +5,13 @@ out vec3 pos;
 
 void main()
 {
-	gl_PointSize = 10;
+	if(lightPos.z < 0){
+		gl_PointSize = (abs(lightPos.x) + 0.2) * 10;
+	}
+	else{
+		gl_PointSize = 1 / (abs(lightPos.x) + 0.2) * 10;
+	}
+	
     gl_Position = vec4(lightPos, 1.0);
 	pos = lightPos;
 }
