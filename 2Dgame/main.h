@@ -30,8 +30,6 @@ void ChangeSize(int w,int h);
 void display();
 void Keyboard(unsigned char key, int x, int y);
 void Keyboardup(unsigned char key, int x, int y);
-void Keyboard2(unsigned char key, int x, int y);
-void Keyboardup2(unsigned char key, int x, int y);
 
 
 void MenuEvents(int option);
@@ -53,6 +51,8 @@ float	currentTime = 0.0f;
 float	deltatime = 0.0f;
 float	time_for_a_jump = 0.5f;
 int is_move_when_jump_deep; // 0 為 非，1 為 向右，2 為 向左
+bool isEnemyHitByDeep(float enemyPosX, float enemyPosY, float skillRange);
+
 
 //===========================================
 //------------------------------------------
@@ -67,6 +67,8 @@ float	currentTimeFiren = 0.0f;
 float	deltatimeFiren = 0.0f;
 float	time_for_a_jump_firen = 0.5f;
 int is_move_when_jump_firen; 
+bool isEnemyHitByFiren(float enemyPosX, float enemyPosY, float skillRange);
+
 //------------------------------------------
 //===========================================
 
@@ -537,7 +539,7 @@ unsigned int particleIndices[] = {
 glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
 glm::vec4 deepPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-GLfloat dt = jump_interval * 0.001;
+GLfloat dt = jump_interval * 0.001f;
 
 //----------------------------------------
 //粒子系統下雨(learn opengl code)
