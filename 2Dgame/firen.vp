@@ -1,0 +1,49 @@
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
+
+out vec3 ourColor;
+out vec2 TexCoord;
+out vec3 FragPos;
+
+
+flat out int mariocontroller;
+uniform int mario_controller;
+
+uniform mat4 offset;
+
+uniform int deepx; 
+uniform int deepy;
+
+uniform int isLeft; // 0:right 1:left
+uniform int deepImage; // 0, 1, 2 
+flat out int deepImg;
+flat out int deep_x;
+flat out int deep_y;
+
+
+uniform mat4 projection;
+uniform mat4 view;
+
+
+
+void main()
+{
+	ourColor = aColor;
+	FragPos = vec3(offset *  vec4(aPos, 1.0));
+	gl_Position = offset *  vec4(aPos, 1.0);
+
+	if(isLeft == 1){
+		TexCoord = vec2(1.0 - aTexCoord.x, aTexCoord.y);
+	}
+	else{
+		TexCoord = vec2(aTexCoord.x, aTexCoord.y);
+	}
+
+	mariocontroller = mario_controller;
+	deepImg = deepImage;
+	deep_x = deepx;
+	deep_y = deepy;
+
+}

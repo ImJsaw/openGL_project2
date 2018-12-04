@@ -29,10 +29,13 @@ int main(int argc, char** argv){
 	glutTimerFunc(deep_interval, Deep_Timer, 0);
 	glutTimerFunc(jump_interval, Jump_Timer, 0);
 
+	glutTimerFunc(firen_interval, Firen_Timer, 0);
+	glutTimerFunc(jumpFiren_interval, JumpFiren_Timer, 0);
 	
 	glutKeyboardFunc(Keyboard);
 	glutKeyboardUpFunc(Keyboardup);
 
+	
 
 	int ParticleNumMenu, ParticleSpeedMenu, ParticleDirectionMenu, ParticleLifeMenu;
 
@@ -390,7 +393,7 @@ void Jump_Timer(int val) {
 //  deepController : 跳7,走65,站4:左   右:0站,12走,3跳
 // deepDirection : 0左 1上 2右 3下
 void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
-	if (isDeepDie == 0) { // 如果還沒死，按了按鍵才有用
+	if (isDeepDie == 0 || isFirenDie == 0) { // 如果還沒死，按了按鍵才有用
 		switch (key) {
 		case 'q': // 扣血
 		case 'Q':
@@ -498,16 +501,125 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 			}
 			deepDirection = 2;
 			break;
+		case 'u': // 扣血
+		case 'U':
+			firenImage = 0;
+			fireny = 4;
+			if (offsetFirenBloodLength > 0) offsetFirenBloodLength -= 0.1f;
+			deltatimeFiren = firenTime; // 計時開始，到1.2秒後deep才能再站起來
+			break;
+		case 'o': // 朱利安柱
+		case 'O':
+			firenImage = 2;
+			fireny = 4;
+			firenx = 6;
+			firenSkillImage = 2; // 朱利安柱子圖片
+			if (isLeftFiren) offsetFirenSkill = offsetFiren;
+			else offsetFirenSkill = offsetFiren;
+			deltatimeFiren = currentTimeFiren; // 讓柱子有向外飛的感覺
+			drawSkillFiren = 1;
+			break;
+		case 'm': // 一般攻擊狀態，飛龍特效啟動
+		case 'M':
+			firenImage = 2;
+			fireny = 4;
+			firenx = 1;
+			firenSkillImage = 1; // 劍氣圖片
+			if (isLeftFiren) offsetFirenSkill = translate(-0.4f, 0, 0) * offsetFiren;
+			else offsetFirenSkill = translate(0.4f, 0, 0) * offsetFiren;
+			drawSkillFiren = 1;
+			deltatimeFiren = firenTime;
+			break;
+		case ',': // 火焰攻擊狀態，吐火焰特效
+		case '<':
+			firenImage = 2;
+			firenSkillImage = 0;
+			if (isLeftFiren) offsetFirenSkill = translate(-0.1f, 0, 0) * offsetFiren;
+			else offsetFirenSkill = translate(0.1f, 0, 0) * offsetFiren;
+			drawSkillFiren = 1;
+
+			deltatimeFiren = currentTimeFiren;
+
+			break;
+		case '.': // 跳躍
+		case '>':
+			if (firenController == 1 || firenController == 0) { // 上一個時刻面向右邊
+
+				if (firenController == 1) {
+					is_move_when_jump_firen = 1;
+				}
+				deltatimeFiren = currentTimeFiren;
+				firenController = 3; // 換成向右跳躍的圖
+			}
+			else if (firenController == 5 || firenController == 4) { // 上一個時刻面向左邊
+
+				if (firenController == 5) {
+					is_move_when_jump_firen = 2;
+				}
+				deltatimeFiren = currentTimeFiren;
+				firenController = 7; // 換成向左跳躍的圖
+			}
+			firenx = 1;
+			fireny = 7;
+			firenImage = 0;
+
+			break;
+		case 'i': // 往上走
+		case 'I':
+			firenDirection = 1;
+			yMoveFiren++;
+			break;
+		case 'k': // 往下走
+		case 'K':
+			firenDirection = 3;
+			yMoveFiren--;
+			break;
+		case 'j':
+		case 'J': // 往左走
+			xMoveFiren--;
+			if (firenController == 7) { // 上一個時刻向左跳
+				firenController = 7; // 仍然向左
+				is_move_when_jump_firen = 2; // 邊跳邊向左移動
+			}
+			else if (firenController == 3) { // 上一個時刻向右跳
+				firenController = 7; // 改成向左
+				is_move_when_jump_firen = 2; // 邊跳邊向左移動
+			}
+			else {
+				firenController = 5; // 向左走
+				isLeftFiren = 1;
+			}
+			firenDirection = 0;
+			break;
+		case 'l':
+		case 'L':
+			xMoveFiren++;
+			if (firenController == 7) { // 上一個時刻向左跳
+				firenController = 3; // 改成向右
+				is_move_when_jump_firen = 1; // 邊跳邊向右移動
+			}
+			else if (firenController == 3) { // 上一個時刻向右跳
+				firenController = 3; // 仍然向右
+				is_move_when_jump_firen = 1; // 邊跳邊向右移動
+			}
+			else {
+				firenController = 1; // 向右走
+				isLeftFiren = 0;
+			}
+			firenDirection = 2;
+			break;
 		}
 	}
 	
+
+
+
 	glutPostRedisplay();
 }
 void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 
-	if (isDeepDie == 0) {// 如果還沒死，放開按鍵才有用
+	if (isDeepDie == 0 || isFirenDie == 0) {// 如果還沒死，放開按鍵才有用
 		switch (key) {
-
 		case 'W': // 往上走
 		case 'w':
 			yMoveDeep--;
@@ -559,16 +671,323 @@ void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 			}
 			if (!yMoveDeep) deepDirection = -1;
 			break;
+		case 'i': // 往上走
+		case 'I':
+			yMoveFiren--;
+			if (!xMoveFiren) firenDirection = -1;
+			firenx = 3; // 回到站立
+			fireny = 1;
+			break;
+		case 'k': // 往下走
+		case 'K':
+			yMoveFiren++;
+			if (!xMoveFiren) firenDirection = -1;
+			firenx = 3; // 回到站立
+			fireny = 1;
+			break;
+		case 'j':
+		case 'J':
+			xMoveFiren++;
+			if (firenController == 7) { // 上一個時刻向左跳
+				firenController = 7; // 仍然向左
+				is_move_when_jump_firen = 0;
+			}
+			else if (firenController == 3) { // 上一個時刻向右跳
+				firenController = 7; // 改成向左
+				is_move_when_jump_firen = 0;
+			}
+			else {
+				firenController = 4; // 向左站立
+				firenx = 1; // 回到站立
+				fireny = 1;
+			}
+			if (!yMoveFiren) firenDirection = -1;
+
+			break;
+		case 'l':
+		case 'L':
+			xMoveFiren--;
+			if (firenController == 7) { // 上一個時刻向左跳
+				firenController = 3; // 改成向右
+				is_move_when_jump_firen = 0;
+			}
+			else if (firenController == 3) { // 上一個時刻向右跳
+				firenController = 3; // 仍然向右
+				is_move_when_jump_firen = 0;
+			}
+			else {
+				firenController = 0; // 向右站立
+				firenx = 1; // 回到站立
+				fireny = 1;
+			}
+			if (!yMoveFiren) firenDirection = -1;
+			break;
 		}
 	}
 	glutPostRedisplay();
 }
 
 
+void Firen_Timer(int val) {
+	glutPostRedisplay();
+	glutTimerFunc(firen_interval, Firen_Timer, val);
+	firenTime += firen_interval * firenSpeed * 0.001f;
+
+	//---------------------------------------------
+	//腳色的連續圖(特殊動作)
+	//---------------------------------------------
+	if (firenImage == 2 && (fireny == 1 || fireny == 2)) { // 火焰攻擊(從第三張圖的第一個位置)
+
+		// 移動圖片deep
+		if (isLeftFiren == 0) {
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			offsetFirenSkill = translate(firen_interval * 0.001f, 0, 0) * offsetFirenSkill;
+			if (firenPosX < 1) firenPosX += firen_interval * 0.0005f;
+		}
+		else if (isLeftFiren == 1) {
+			offsetFirenSkill = translate(-firen_interval * 0.001f, 0, 0) * offsetFirenSkill;
+			if (firenPosX > -1) firenPosX -= firen_interval * 0.0005f;
+		}
+
+		if (firenx == 2 && fireny == 2) {
+			firenImage = 0; // 換回圖片0
+			firenx = 1; // 回到靜止圖
+			fireny = 1;
+		}
+		else if ((fireny == 1 && firenx == 10)) { // 往下一排走的條件
+			fireny++;
+		}
+		else if ((fireny == 1 && firenx != 10)) { // deepx 往右走
+			firenx++;
+		}
+		else if ((fireny == 2 && firenx != 1)) { // deepx 往左走
+			firenx--;
+		}
+
+
+	}
+	else if (firenImage == 2 && fireny == 4 && (firenx <= 5)) { // 一般攻擊(在連續圖的第四行)
+		if (isLeftFiren == 0 && (firenTime - deltatimeFiren < 0.5)) {
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if (firenPosX < 1) firenPosX += firen_interval * 0.0005f;
+		}
+		else if (isLeftFiren == 1 && (firenTime - deltatimeFiren < 0.5)) {
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (firenPosX > -1) firenPosX -= firen_interval * 0.0005f;
+		}
+
+		if (firenx == 5) {
+			if (firenTime - deltatimeFiren > 1.5) {
+				firenImage = 0; // 換回圖片0
+				firenx = 1; // 回到靜止圖
+				fireny = 1;
+			}
+		}
+		else if (firenx != 5) { // deepx 往右走
+			firenx++;
+		}
+		//printf("firenx = %d fireny = %d\n", firenx, fireny);
+	}
+	else if (firenImage == 2 && (fireny == 4 || fireny == 5) && (firenx >= 6)) { // 丟東西(火柱)
+		if (isLeftFiren == 0) {
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if (firenPosX < 1)if (firenPosX > -1) firenPosX += firen_interval * 0.0005f;
+		}
+		else if (isLeftFiren == 1) {
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (firenPosX > -1) firenPosX -= firen_interval * 0.0005f;
+		}
+
+		if (firenx == 9 && fireny == 5) {
+			firenImage = 0; // 換回圖片0
+			firenx = 1; // 回到靜止圖
+			fireny = 1;
+		}
+		else if (firenx != 10 && fireny == 4) { // deepx 往右走
+			firenx++;
+		}
+		else if (firenx == 10 && fireny == 4) {
+			fireny++;
+		}
+		else if (firenx != 1 && fireny == 5) {
+			firenx--;
+		}
+
+	}
+	else if (firenImage == 0 && fireny == 4 && isFirenDie == 0) { // 扣血
+		if (isLeftFiren == 0 && deltatimeFiren + 0.2 >= firenTime) {
+			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
+			if (firenPosX > -1) firenPosX -= firen_interval * 0.0005f;
+		}
+		else if (isLeftFiren == 1 && deltatimeFiren + 0.2 >= firenTime) {
+			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
+			if (firenPosX < 1) firenPosX += firen_interval * 0.0005f;
+		}
+
+		if (firenx == 6) {
+			if (offsetFirenBloodLength <= 0.0) { // 已死亡，跳出這個被打到的動畫
+				isFirenDie = 1;
+			}
+			else if (offsetFirenBloodLength >= 0.0 && deltatimeFiren + 1.2 <= firenTime) { // 還沒死，但要躺在地上一下
+				firenImage = 0; // 換回圖片0
+				firenx = 1; // 回到靜止圖
+				fireny = 1;
+
+			}
+		}
+		else if (firenx != 6) { // deepx 往右走
+			firenx++;
+		}
+	}
+	//---------------------------------------------
+	//技能特效連續圖
+	//---------------------------------------------
+	if (drawSkillFiren == 1 && firenSkillImage == 0) { // 藍色火焰播放連續圖
+
+		if (isLeftFiren == 0) {
+
+			offsetFirenSkill = translate((currentTimeFiren - deltatimeFiren) * 10 * firen_interval * 0.0001f, 0, 0) * offsetFirenSkill;
+		}
+		else if (isLeftFiren == 1) {
+
+			offsetFirenSkill = translate((currentTimeFiren - deltatimeFiren) * 10 * -firen_interval * 0.0001f, 0, 0) * offsetFirenSkill;
+		}
+
+		// skill 連續圖動畫
+		if (firenSkillx == 6 && firenSkilly == 3) {
+			firenSkillx = 1; // 回到靜止圖
+			firenSkilly = 1;
+			drawSkillFiren = 0;
+		}
+		else if (firenSkillx != 6) {
+			firenSkillx++;
+		}
+		else if (firenSkillx == 6) {
+			firenSkilly++;
+			firenSkillx = 1;
+		}
+
+	}
+	else if (drawSkillFiren == 1 && firenSkillImage == 1) { // 噴火播放連續圖
+
+		if (isLeftFiren == 0) {
+
+			offsetFirenSkill = translate(firen_interval * 0.002f, 0, 0) * offsetFirenSkill;
+		}
+		else if (isLeftFiren == 1) {
+
+			offsetFirenSkill = translate(-firen_interval * 0.002f, 0, 0) * offsetFirenSkill;
+		}
+
+		// skill 連續圖動畫
+		if (firenSkillx == 4 && firenSkilly == 4) {
+			firenSkillx = 1; // 回到靜止圖
+			firenSkilly = 1;
+			drawSkillFiren = 0;
+		}
+		else if (firenSkillx != 4) { // x : 1 -> 2
+			firenSkillx++;
+		}
+		else if (firenSkillx == 4) { // y : 1 -> 2 ； x : 1 
+			firenSkilly++;
+			firenSkillx = 1;
+		}
+	}
+	else if (drawSkillFiren == 1 && firenSkillImage == 2) { // 朱利安柱子連續圖
+		if (isLeftFiren) offsetFirenSkill = translate(-0.2f, 0, 0) * offsetFiren;
+		else offsetFirenSkill = translate(-0.2f, 0, 0) * offsetFiren;
+
+		// skill 連續圖動畫
+		if (firenSkillx == 6) {
+			firenSkillx = 1; // 回到靜止圖
+			firenSkilly = 1;
+			drawSkillFiren = 0;
+		}
+		else if (firenSkillx != 6) { // x : 1 -> 2
+			firenSkillx++;
+		}
+
+	}
+
+	//---------------------------------------------
+	//血條動畫
+	//---------------------------------------------
+	offsetFirenBlood = translate(0, 0.16f, 0) * offsetFiren; // 讓血條一直待在deep上方
+
+}
+void JumpFiren_Timer(int val) {
+
+	glutPostRedisplay();
+	glutTimerFunc(jumpFiren_interval, JumpFiren_Timer, val);
+	currentTimeFiren += jumpFiren_interval * 0.001f;
+
+	//----------------------------------------
+	// 跳起的位移和動畫連續圖
+	//----------------------------------------
+	// jump_interval 為 30 時，最接近正常每秒的速度
+	if (firenController == 3 || firenController == 7) { // 跳起到著地的時間
+		if ((currentTimeFiren - deltatimeFiren) >= time_for_a_jump_firen) { // 要著地了，看向哪一方
+			deltatimeFiren = 0.0f;
+			is_move_when_jump_firen = 0;
+			if (firenController == 3) {
+				firenController = 0; // 著地後，看向右方
+			}
+			else if (firenController == 7) {
+				firenController = 4; // 著地後，看向左方
+			}
+
+			firenx = 1;
+			fireny = 1;
+			firenImage = 0;
+		}
+		else if ((currentTimeFiren - deltatimeFiren) < time_for_a_jump_firen) {
+			float radian = DOR((currentTimeFiren - deltatimeFiren) * (180 / (time_for_a_jump_firen + 0.017f)));
+			// currentTime - deltatime : 0 到 time_for_a_jump(1.2)
+			// 180/(time_for_a_jump+0.015) : 讓currentTime - deltatime從0到180(度)，0.015是誤差，計時器和正常時間有偏差
+			if (is_move_when_jump_firen == 1) { // 邊跳邊向右
+				//offset = translate(jump_interval * 0.0001f, 0, 0) * offset;
+				firenPosX += firen_interval * 0.0005f;
+			}
+			else if (is_move_when_jump_firen == 2) { // 邊跳邊向左
+				//offset = translate(-jump_interval * 0.0001f, 0, 0) * offset;
+				firenPosX -= firen_interval * 0.0005f;
+			}
+			//offset = translate(0, cos( radian )*0.07f, 0) * offset; // 跳躍的矩陣
+			firenPosY += cos(radian)*0.07f;
+
+			if (firenx != 4) {
+				firenx++;
+			}
+		}
+	}
+	else if (firenDirection != -1) {//normal move
+		//offset = translate(jump_interval * 0.001f* xMove, jump_interval * 0.001f* yMove, 0) * offset;
+		if (firenPosX < 1 && firenPosX > -1) firenPosX += jumpFiren_interval * 0.001f* xMoveFiren;
+		if (firenPosY < 0 && firenPosY > -1) firenPosY += jumpFiren_interval * 0.001f* yMoveFiren;
+		firenx++;
+		if (firenPosY > 0 && firenController != 7) firenPosY = -0.01;
+		if (firenx == 8) firenx = 3;
+	}
+
+	//------------------------------------
+	//update pos and set the boundary
+	//------------------------------------
+	if (firenPosX > 1) firenPosX = 0.99;
+	if (firenPosX < -1) firenPosX = -0.99;
+	if (firenPosY < -0.89) firenPosY = -0.89;
+	offsetFiren = translate(firenPosX, firenPosY, 0);
+	cout << "firen Position : " << firenPosX << " , " << firenPosY << endl;
+
+
+}
+
+
+
+
 void init() {
 	
 	initDeep();
-
+	initFiren();
 
 	//----------------------------
 	//background setting
@@ -1117,7 +1536,271 @@ void initDeep() {
 	offsetDeepBloodLengthID = glGetUniformLocation(programDeepBlood, "offsetBlood");
 }
 
+void initFiren() {
+	//-----------------------
+	// deep-setting
+	//-----------------------
+	firenPosX = 0.8f;
+	firenPosY = -0.2f;
 
+	firenController = 0; // 向右站立
+	offsetFiren = translate(-0.9f, 0, 0); // 初始化矩陣，只有腳色的矩陣translate到螢幕左邊
+	firenx = 1; // 貼圖座標移動矩陣
+	fireny = 1;
+	xMoveFiren = 0;
+	yMoveFiren = 0;
+
+	is_move_when_jump_firen = 0;
+
+	isLeftFiren = 0;
+	firenDirection = -1;
+	firenImage = 0;
+
+	ShaderInfo firenShader[] = {
+		{ GL_VERTEX_SHADER, "firen.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "firen.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programFiren = LoadShaders(firenShader);//讀取shader
+
+	glUseProgram(programFiren);//uniform參數數值前必須先use shader
+
+	glGenVertexArrays(1, &VAOf);
+	glGenBuffers(1, &VBOf);
+	glGenBuffers(1, &EBOf);
+
+	glBindVertexArray(VAOf);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOf);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(firenVertices), firenVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOf);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(firenIndices), firenIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord attribute(for image1)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glUseProgram(programFiren);
+
+	for (int spriteID = 0; spriteID < objectCountFiren; ++spriteID)
+	{
+		firenSheets[spriteID] = new Sprite2D();
+	}
+	firenSheets[0]->Init("sys/firen_0.png", 7, 10, 50);
+	firenSheets[1]->Init("sys/firen_1.png", 7, 10, 50);
+	firenSheets[2]->Init("sys/firen_2.png", 5, 10, 50);
+	for (int spriteID = 0; spriteID < objectCountFiren; ++spriteID)
+	{
+		firenNormalSheets[spriteID] = new Sprite2D();
+	}
+	firenNormalSheets[0]->Init("sys/firen_0_normal.png", 7, 10, 50);
+	firenNormalSheets[1]->Init("sys/firen_1_normal.png", 7, 10, 50);
+	firenNormalSheets[2]->Init("sys/firen_2_normal.png", 5, 10, 50);
+
+	firencontrollerID = glGetUniformLocation(programFiren, "mario_controller");
+	timeFirenID = glGetUniformLocation(programFiren, "time");
+	offsetFirenID = glGetUniformLocation(programFiren, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
+	firenxID = glGetUniformLocation(programFiren, "deepx");
+	firenyID = glGetUniformLocation(programFiren, "deepy");
+	isLeftFirenID = glGetUniformLocation(programFiren, "isLeft");
+	firenImageID = glGetUniformLocation(programFiren, "deepImage");
+	projectionFirenID = glGetUniformLocation(programFiren, "projection");
+	viewFirenID = glGetUniformLocation(programFiren, "view");
+	viewPosFirenID = glGetUniformLocation(programFiren, "viewPos");
+	lightPosFirenID = glGetUniformLocation(programFiren, "lightPos");
+
+	//-----------------------
+	// skill-setting
+	//-----------------------
+	offsetFirenSkill = scale(1, 1, 1);
+	firenSkillx = 1;
+	firenSkilly = 1;
+	firenSkillImage = 0;
+	drawSkillFiren = 0;
+
+	ShaderInfo skillShader[] = {
+		{ GL_VERTEX_SHADER, "firenskill.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "firenskill.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programFirenSkill = LoadShaders(skillShader);//讀取shader
+
+	glUseProgram(programFirenSkill);//uniform參數數值前必須先use shader
+
+	//---------------------------------
+	//dragon instance initialize(五個龍的位置offset)
+	//---------------------------------
+	int index = 0;
+	for (int y = -2; y <= 2; y++)
+	{
+		glm::vec2 translation;
+		translation.x = abs(y * 0.1f);
+		translation.y = y * 0.1f;
+		fireOffset[index++] = translation;
+	}
+	// --------------------------------------
+	// store instance data in an array buffer(一次生成五龍，該VBO放置算好的偏差值)
+	// --------------------------------------
+	unsigned int instanceVBO;
+	glGenBuffers(1, &instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 5, &fireOffset[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//---------------------------------
+	//dragon instance initialize(五個柱子的位置offset)
+	//---------------------------------
+	int index2 = 0;
+	for (int x = -6; x <= 6; x += 3)
+	{
+		glm::vec2 translation;
+		translation.x = x * 0.1f;
+		translation.y = 0;
+		fireColumnOffset[index2++] = translation;
+	}
+	// --------------------------------------
+	// store instance data in an array buffer(一次生成五龍，該VBO放置算好的偏差值)
+	// --------------------------------------
+	unsigned int instanceVBO2;
+	glGenBuffers(1, &instanceVBO2);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 5, &fireColumnOffset[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+	// --------------------------------------
+	// 一般的 VAO VBO EBO
+	// --------------------------------------
+	glGenVertexArrays(1, &VAOfskill);
+	glGenBuffers(1, &VBOfskill);
+	glGenBuffers(1, &EBOfskill);
+
+	glBindVertexArray(VAOfskill);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOfskill);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skillFirenVertices) + sizeof(skillFirenVertices2), skillFirenVertices, GL_STATIC_DRAW); // A+B的空間中先綁定A
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(skillFirenVertices), sizeof(skillFirenVertices2), skillFirenVertices2); // 再綁定B，才不會圖片有問題
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOfskill);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(firenIndices), firenIndices, GL_STATIC_DRAW);
+
+	//---------------------------------
+	//sword-light
+	//---------------------------------
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	// texture coord attribute(for image-刀流)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	//---------------------------------
+	//dragon-fly
+	//---------------------------------
+	// position aattribute(dragon is longer than sword-light)
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(32 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+
+	// texture coord attribute(for image-dragon)
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(35 * sizeof(float)));
+	glEnableVertexAttribArray(4);
+
+	// 五個龍的偏差值，另外傳入(因為使用的是不同的VBO)
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO); // this attribute comes from a different vertex buffer
+	glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0); // 從instanceVBO傳入的
+	glEnableVertexAttribArray(5);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribDivisor(5, 1); // tell OpenGL this is an instanced vertex attribute.
+	//(index of attribpointer, update/indice)
+
+	// 五個朱利安柱子的偏差值，另外傳入(因為使用的是不同的VBO)
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO2); // this attribute comes from a different vertex buffer
+	glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0); // 從instanceVBO傳入的
+	glEnableVertexAttribArray(6);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribDivisor(6, 1); // tell OpenGL this is an instanced vertex attribute.
+	//(index of attribpointer, update/indice)
+
+
+	glUseProgram(programFirenSkill);
+
+	for (int spriteID = 0; spriteID < objectCountFiren; ++spriteID)
+	{
+		firenSkillSheets[spriteID] = new Sprite2D();
+	}
+	firenSkillSheets[0]->Init("sys/blue_flame.png", 3, 6, 18);
+	firenSkillSheets[1]->Init("sys/firen_grd.png", 4, 4, 18);
+	firenSkillSheets[2]->Init("sys/firen_column.png", 1, 6, 18);
+
+	glUniform1i(glGetUniformLocation(programFirenSkill, "twinsflame"), 0);
+	glUniform1i(glGetUniformLocation(programFirenSkill, "firedragon"), 1);
+	glUniform1i(glGetUniformLocation(programFirenSkill, "julianColumn"), 2);
+
+
+
+	offsetSkillFirenID = glGetUniformLocation(programFirenSkill, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
+	firenSkillxID = glGetUniformLocation(programFirenSkill, "skillx");
+	firenSkillyID = glGetUniformLocation(programFirenSkill, "skilly");
+	isLeftSkillFirenID = glGetUniformLocation(programFirenSkill, "isLeft");
+	firenSkillImageID = glGetUniformLocation(programFirenSkill, "skillImage");
+	firenSkillTimeID = glGetUniformLocation(programFirenSkill, "time");
+
+
+	//----------------------------
+	//deepblood setting
+	//---------------------------
+	offsetFirenBlood = translate(0, 0.16f, 0);
+	offsetFirenBloodLength = 1;
+
+	ShaderInfo deepBloodShader[] = {
+		{ GL_VERTEX_SHADER, "firenblood.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "firenblood.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programFirenBlood = LoadShaders(deepBloodShader);//讀取shader
+
+	glUseProgram(programFirenBlood);//uniform參數數值前必須先use shader
+
+	glGenVertexArrays(1, &VAOfb);
+	glGenBuffers(1, &VBOfb);
+	glGenBuffers(1, &EBOfb);
+
+	glBindVertexArray(VAOfb);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOfb);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(firenBloodVertices), firenBloodVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOfb);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(firenBloodIndices), firenBloodIndices, GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord attribute(for image1)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glUseProgram(programFirenBlood);
+
+	firenBloodImg = loadTexture("sys/brightred.jpg");
+
+	glUniform1i(glGetUniformLocation(programFirenBlood, "deepBlood"), 0);
+
+	offsetFirenBloodID = glGetUniformLocation(programFirenBlood, "offset"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
+	offsetFirenBloodLengthID = glGetUniformLocation(programFirenBlood, "offsetBlood");
+}
 
 void display() {
 
@@ -1126,7 +1809,7 @@ void display() {
 	//先畫在我的frambuffer上
 	//---------------------------------
 	
-	if (isDeepDie == 1) {
+	if (isDeepDie == 1 || isFirenDie == 1) {
 		if (frameColor.x > 0.0) {
 			frameColor.x -= 0.005;
 			frameColor.y -= 0.005;
@@ -1191,42 +1874,6 @@ void display() {
 
 
 
-	/*//---------------------------------------
-	//rain particle
-	//---------------------------------------
-	glUseProgram(programParticleRain);
-	currentTimeStar = currentTime;
-	deltaTimeStar = (currentTimeStar - lastTime) * 0.001;
-	lastTime = currentTimeStar;
-
-	glUseProgram(programParticleRain);
-	
-	float f_timer_cnt = glutGet(GLUT_ELAPSED_TIME);
-	float currentTiming = f_timer_cnt * 0.001f;
-
-	currentTiming *= 0.1f;
-	//currentTiming -= floor(currentTiming); // 0, -0.9, -0.8, ..., -0.1, 0
-
-
-
-	glUniform1f(time_Loc, currentTiming);
-	glUniformMatrix4fv(proj_location, 1, GL_FALSE, &proj_matrix[0][0]);
-
-	glEnable(GL_POINT_SPRITE);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBindVertexArray(VAOpr);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glEnable(GL_PROGRAM_POINT_SIZE);
-
-	glDrawArrays(GL_POINTS, 0, NUM_STARS);
-	
-	glDisable(GL_POINT_SPRITE);
-	glDisable(GL_BLEND);
-	glDisable(GL_PROGRAM_POINT_SIZE);*/
-
 
 	// -----------------------
 	// rain-particle draw
@@ -1252,13 +1899,9 @@ void display() {
 	// Don't forget to reset to default blending mode
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
-
-	
-
 	
 	//-----------------------
-	// skill-draw
+	// deepskill-draw
 	//-----------------------
 	// 在deep之後畫skill，skill才能跟deep一起移動
 	glUseProgram(programSkill);
@@ -1378,6 +2021,111 @@ void display() {
 	glUseProgram(programDeepBlood);
 	glBindVertexArray(VAOdb);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+	//--------------------------------------------------------
+	//========================================================
+	//-----------------------
+	// skill-draw
+	//-----------------------
+	// 在deep之後畫skill，skill才能跟deep一起移動
+	glUseProgram(programFirenSkill);
+	glBindVertexArray(VAOfskill);
+	glUniformMatrix4fv(offsetSkillFirenID, 1, false, &offsetFirenSkill[0][0]);
+	glUniform1i(firenSkillxID, firenSkillx);
+	glUniform1i(firenSkillyID, firenSkilly);
+	glUniform1i(isLeftSkillFirenID, isLeftFiren);
+	glUniform1i(firenSkillImageID, firenSkillImage);
+	glUniform1f(firenSkillTimeID, currentTimeFiren - deltatimeFiren);
+	// bind textures on corresponding texture units
+
+	glActiveTexture(GL_TEXTURE0);
+	firenSkillSheets[firenSkillImage]->Enable();
+
+	// render container
+	glUseProgram(programFirenSkill);
+	glBindVertexArray(VAOfskill);
+
+
+	if (drawSkillFiren == 1) {
+		if (firenSkillImage == 0) {
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		}
+		else if (firenSkillImage == 1) {
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 5);
+			glBindVertexArray(0);
+		}
+		else if (firenSkillImage == 2) {
+			glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 5);
+			glBindVertexArray(0);
+		}
+	}
+	firenSkillSheets[firenImage]->Disable();
+
+
+
+
+
+	//-----------------------
+	// firen-draw
+	//-----------------------
+	glUseProgram(programFiren); // 記得要useprogram 和 vao，不然東西會綁到上一個skillProgram中
+	glBindVertexArray(VAOf);
+
+	glUniform1i(firencontrollerID, firenController);
+	glUniform1f(timeFirenID, firenTime);
+	glUniformMatrix4fv(offsetFirenID, 1, false, &offsetFiren[0][0]);
+	glUniform1i(firenxID, firenx);
+	glUniform1i(firenyID, fireny);
+	glUniform1i(isLeftFirenID, isLeftFiren);
+	glUniform1i(firenImageID, firenImage);
+	// bind textures on corresponding texture units
+	//glm::mat4 projection2 = glm::ortho(0.0f, SCR_WIDTH, SCR_HEIGHT, 0.0f, -1.0f, 1.0f);
+	//glm::mat4 view2 = camera.GetViewMatrix();
+	glUseProgram(programFiren);
+	glUniformMatrix4fv(projectionFirenID, 1, false, &projection[0][0]);
+	glUniformMatrix4fv(viewFirenID, 1, false, &view[0][0]);
+
+	glUniform3fv(viewPosFirenID, 1, &camera.Position[0]);
+	glUniform3fv(lightPosFirenID, 1, &lightPos[0]);
+
+
+	glActiveTexture(GL_TEXTURE0);
+	firenSheets[firenImage]->Enable();
+	glActiveTexture(GL_TEXTURE1);
+	firenNormalSheets[firenImage]->Enable();
+
+
+	// render container
+	glUseProgram(programFiren);
+	glBindVertexArray(VAOf);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	firenSheets[firenImage]->Disable();
+	firenNormalSheets[firenImage]->Disable();
+
+	//-----------------------
+	// firenblood-draw
+	//-----------------------
+	glUseProgram(programFirenBlood); // 記得要useprogram 和 vao，不然東西會綁到上一個skillProgram中
+	glBindVertexArray(VAOfb);
+
+	glUniformMatrix4fv(offsetFirenBloodID, 1, false, &offsetFirenBlood[0][0]);
+	glUniform1f(offsetFirenBloodLengthID, offsetFirenBloodLength);
+
+	// bind textures on corresponding texture units
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, firenBloodImg);
+
+	// render container
+	glUseProgram(programFirenBlood);
+	glBindVertexArray(VAOfb);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	//==============================================================================
+	//------------------------------------------------------------------------------
+
+
+
 
 
 	//------------------------------------

@@ -98,6 +98,24 @@
     <None Include="light.fp">
       <Filter>shader</Filter>
     </None>
+    <None Include="firen.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="firen.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="firenblood.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="firenblood.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="firenskill.fp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="firenskill.vp">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="shader">

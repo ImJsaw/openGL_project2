@@ -110,6 +110,12 @@
     <None Include="deepblood.vp" />
     <None Include="deepskill.fp" />
     <None Include="deepskill.vp" />
+    <None Include="firen.fp" />
+    <None Include="firen.vp" />
+    <None Include="firenblood.fp" />
+    <None Include="firenblood.vp" />
+    <None Include="firenskill.fp" />
+    <None Include="firenskill.vp" />
     <None Include="framebuffer.fp" />
     <None Include="framebuffer.vp" />
     <None Include="light.fp" />

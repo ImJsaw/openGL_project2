@@ -24,12 +24,15 @@ GLfloat SCR_HEIGHT = 600;
 
 void init();
 void initDeep();
-
+void initFiren();
 
 void ChangeSize(int w,int h);
 void display();
 void Keyboard(unsigned char key, int x, int y);
 void Keyboardup(unsigned char key, int x, int y);
+void Keyboard2(unsigned char key, int x, int y);
+void Keyboardup2(unsigned char key, int x, int y);
+
 
 void MenuEvents(int option);
 void ParticleMenuEvents(int option);
@@ -50,6 +53,22 @@ float	currentTime = 0.0f;
 float	deltatime = 0.0f;
 float	time_for_a_jump = 0.5f;
 int is_move_when_jump_deep; // 0 為 非，1 為 向右，2 為 向左
+
+//===========================================
+//------------------------------------------
+void	Firen_Timer(int val);
+float	firen_interval = 60;
+float	firenTime = 0.0f;
+float	firenSpeed = 1.0f;
+
+void	JumpFiren_Timer(int val);
+float	jumpFiren_interval = 30;
+float	currentTimeFiren = 0.0f;
+float	deltatimeFiren = 0.0f;
+float	time_for_a_jump_firen = 0.5f;
+int is_move_when_jump_firen; 
+//------------------------------------------
+//===========================================
 
 mat4 translate(float x,float y,float z);
 mat4 scale(float x,float y,float z);
@@ -75,6 +94,22 @@ GLuint EBOskill;
 GLuint VAOdb;
 GLuint VBOdb;
 GLuint EBOdb;
+
+//------------------------------------------
+//===========================================
+GLuint VAOf; // for deep
+GLuint VBOf;
+GLuint EBOf;
+
+GLuint VAOfskill;
+GLuint VBOfskill;
+GLuint EBOfskill;
+
+GLuint VAOfb;
+GLuint VBOfb;
+GLuint EBOfb;
+//===========================================
+//------------------------------------------
 
 //----------------------------
 // background, particle(deep), particle(rain)
@@ -104,6 +139,14 @@ unsigned int rbo;
 unsigned int programDeep; // deep-program
 unsigned int programSkill; // deep-program
 unsigned int programDeepBlood;
+
+//------------------------------------------
+//===========================================
+unsigned int programFiren; // deep-program
+unsigned int programFirenSkill; // deep-program
+unsigned int programFirenBlood;
+//===========================================
+//------------------------------------------
 
 unsigned int programBack;
 unsigned int programParticle;
@@ -148,7 +191,39 @@ GLuint skillTimeID;
 GLuint offsetDeepBloodID;
 GLuint offsetDeepBloodLengthID;
 
-
+//------------------------------------------
+//===========================================
+//-----------------------
+// firen-shader ID 位址
+//-----------------------
+GLuint firenController;
+GLuint firencontrollerID;
+GLuint offsetFirenID;
+GLuint firenxID;
+GLuint firenyID;
+GLuint isLeftFirenID;
+GLuint firenImageID;
+GLuint projectionFirenID;
+GLuint viewFirenID;
+GLuint viewPosFirenID;
+GLuint lightPosFirenID;
+GLuint timeFirenID;
+//-----------------------
+// skill-shader ID 位址
+//-----------------------
+GLuint offsetSkillFirenID;
+GLuint firenSkillxID;
+GLuint firenSkillyID;
+GLuint isLeftSkillFirenID;
+GLuint firenSkillImageID;
+GLuint firenSkillTimeID;
+//-----------------------
+// firenBlood-shader ID 位址
+//-----------------------
+GLuint offsetFirenBloodID;
+GLuint offsetFirenBloodLengthID;
+//===========================================
+//------------------------------------------
 
 
 
@@ -188,9 +263,8 @@ GLuint lightPosID;
 mat4 offsetDeep; // deep移動
 int deepx; // 移動貼圖座標
 int deepy; // 移動貼圖座標
-int deep_0; // 圖片1
-int deep_1;
-int deep_2;
+float deepPosX = 0, deepPosY = 0;
+
 Sprite2D* deepSheets[3];
 Sprite2D* deepNormalSheets[3];
 int objectCount = 3;
@@ -223,6 +297,46 @@ int deepBloodImg; // 血條圖片
 mat4 offsetDeepBlood; // 血條矩陣，跟隨deep
 float offsetDeepBloodLength; // 扣血
 
+//------------------------------------------
+//===========================================
+//-----------------------
+// firen-variables
+//-----------------------
+mat4 offsetFiren; // deep移動
+int firenx; // 移動貼圖座標
+int fireny; // 移動貼圖座標
+int xMoveFiren, yMoveFiren;
+Sprite2D* firenSheets[3];
+Sprite2D* firenNormalSheets[3];
+int objectCountFiren = 3;
+int isLeftFiren; // 是不是左邊
+int firenDirection; // 左上右下
+int isFirenDie = 0;
+int isFirenShine = 0;
+int firenImage;
+
+//-----------------------
+// skill-variables
+//-----------------------
+
+mat4 offsetFirenSkill;
+int firenSkillx;
+int firenSkilly;
+Sprite2D* firenSkillSheets[3];
+glm::vec2 fireOffset[5];
+glm::vec2 fireColumnOffset[5];
+int firenSkillImage;
+int drawSkillFiren;
+
+//-----------------------
+// firen-blood-variables
+//-----------------------
+int firenBloodImg; // 血條圖片
+mat4 offsetFirenBlood; // 血條矩陣，跟隨deep
+float offsetFirenBloodLength; // 扣血
+//===========================================
+//------------------------------------------
+
 //-----------------------
 // background-variables
 //-----------------------
@@ -242,13 +356,6 @@ int lightImg;
 //-----------------------
 // deep-vertices
 //-----------------------
-/*float deepVertices[] = {
-	// positions          // colors           // texture coords for img 0/1
-	0.08f,  0.1f, 0.0f,   1.0f, 0.0f, 0.0f,  0.1f, 1.0f,      
-	0.08f, -0.1f, 0.0f,   0.0f, 1.0f, 0.0f,   0.1f, 0.87f,    
-	-0.08, -0.1f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.87f,   
-	-0.08f,  0.1f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f   
-};*/
 float deepVertices[] = {
 	// positions          // colors           // texture coords for img 0/1
 	0.1f,  0.12f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
@@ -269,24 +376,11 @@ unsigned int deepIndices[] = {
 	1, 2, 3  // second triangle
 };
 
-float deepPosX = 0, deepPosY = 0;
+
 
 //-----------------------
 // skill-vertices
 //-----------------------
-/*float skillVertices[] = {
-	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
-	0.08f,  0.08f, 0.0f,   1.0f, 0.0f, 0.0f,   0.25f, 1.0f,
-	0.08f, -0.08f, 0.0f,   0.0f, 1.0f, 0.0f,   0.25f, 0.5f,
-	-0.08f, -0.08f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.5f,
-	-0.08f,  0.08f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
-};
-float skillVertices2[] = { // 飛龍
-	0.4f,  0.15f, 0.0f,     0.5f, 1.0f, // up-right
-	0.4f, -0.15f, 0.0f,     0.5f, 0.8f, // down-right
-	-0.4f, -0.15f, 0.0f,     0.0f, 0.8f,  // down-left
-	-0.4f,  0.15f, 0.0f,     0.0f, 1.0f   // up-left
-};*/
 float skillVertices[] = {
 	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
 	0.08f,  0.08f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
@@ -319,6 +413,68 @@ unsigned int deepBloodIndices[] = {
 	0, 1, 3, // first triangle
 	1, 2, 3  // second triangle
 };
+
+
+//------------------------------------------
+//===========================================
+//-----------------------
+// firen-vertices
+//-----------------------
+float firenVertices[] = {
+	// positions          // colors           // texture coords for img 0/1
+	0.1f,  0.12f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+	0.1f, -0.12f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.1f, -0.12f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.1f,  0.12f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+};
+
+
+
+unsigned int firenIndices[] = {
+	0, 1, 3, // first triangle
+	1, 2, 3  // second triangle
+};
+
+float firenPosX = 0, firenPosY = 0;
+
+//-----------------------
+// skill-vertices
+//-----------------------
+float skillFirenVertices[] = {
+	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
+	0.08f,  0.08f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+	0.08f, -0.08f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.08f, -0.08f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.08f,  0.08f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+};
+float skillFirenVertices2[] = { // 飛龍
+	0.2f,  0.15f, 0.0f,     1.0f, 1.0f, // up-right
+	0.2f, -0.15f, 0.0f,     1.0f, 0.0f, // down-right
+	-0.2f, -0.15f, 0.0f,     0.0f, 0.0f,  // down-left
+	-0.2f,  0.15f, 0.0f,     0.0f, 1.0f   // up-left
+};
+unsigned int skillFirenIndices[] = {
+	0, 1, 3, // first triangle
+	1, 2, 3  // second triangle
+};
+
+//-----------------------
+// firenblood-variables
+//-----------------------
+float firenBloodVertices[] = {
+	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
+	0.05f,  0.01f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+	0.05f, -0.01f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.05f, -0.01f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.05f,  0.01f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+};
+unsigned int firenBloodIndices[] = {
+	0, 1, 3, // first triangle
+	1, 2, 3  // second triangle
+};
+//===========================================
+//------------------------------------------
+
 
 //-----------------------
 // background-variables

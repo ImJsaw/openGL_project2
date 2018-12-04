@@ -1,0 +1,94 @@
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
+layout (location = 3) in vec3 aPos2; // 飛龍
+layout (location = 4) in vec2 aTexCoord2; // 飛龍
+layout (location = 5) in vec2 aOffset; // 飛龍，畫很多
+layout (location = 6) in vec2 aOffset2; // 朱利安柱子，畫很多
+
+out vec3 ourColor;
+out vec2 TexCoord;
+flat out int skill_x;
+flat out int skill_y;
+
+
+uniform mat4 offset;
+
+uniform int skillx; 
+uniform int skilly;
+
+uniform int isLeft; // 0:right 1:left
+uniform int skillImage; // 0, 1, 2 
+flat out int skillImg;
+
+uniform float time; // 讓朱利安柱子隨時間向外
+
+void main()
+{
+	
+	ourColor = aColor;
+
+	/*if(skillImage == 0){ // 冰火劍氣的texcoord
+		gl_Position = offset * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord.x + (skillx-1) * 0.25, aTexCoord.y - (skilly-1) * 1.0 / 2 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord.x + (4-skillx) * 0.25), aTexCoord.y - (skilly-1) * 1.0 / 2 );
+
+		}
+	}
+	else if(skillImage == 1){ // 火焰飛龍
+		gl_Position = offset * vec4(aPos2.x + aOffset.x, aPos2.y + aOffset.y, aPos2.z, 1.0);
+		//gl_Position = offset * vec4(aPos2.x , aPos2.y, aPos2.z, 1.0);
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord2.x + (skillx-1) * 0.5, aTexCoord2.y - (skilly-1) * 1.0 / 5 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord2.x + (2-skillx) * 0.5), aTexCoord2.y - (skilly-1) * 1.0 / 5 );
+		}
+	}
+	else if(skillImage == 2){
+		//gl_Position = offset * vec4((aPos.x + 0.4) * 2 + aOffset2.x, (aPos.y + 0.07)* 12 + aOffset2.y, aPos.z, 1.0);
+		
+		vec4 t = vec4(aOffset2.x * time * 2, aOffset2.y, 0, 1);
+		vec4 a = vec4(1, 0 , 0, 0);
+		vec4 b = vec4(0, 1 , 0, 0);
+		vec4 c = vec4(0, 0 , 1, 0);
+		mat4 xOffset = mat4(a, b, c, t);
+		gl_Position = xOffset * offset * vec4((aPos.x + 0.1) * 2, (aPos.y + 0.07)* 12, aPos.z, 1.0);
+		if(isLeft == 0){
+			TexCoord = vec2(aTexCoord.x + (skillx-1) * 0.25, aTexCoord.y - (skilly-1) * 1.0 / 2 );
+		}
+		else {
+			TexCoord = vec2( 1.0 - (aTexCoord.x + (4-skillx) * 0.25), aTexCoord.y - (skilly-1) * 1.0 / 2 );
+		}
+	}*/
+
+	if(skillImage == 0){ // 冰火劍氣的texcoord
+		gl_Position = offset * vec4(aPos.x * time * 1.5, aPos.y * time * 1.5, aPos.z, 1.0);
+	}
+	else if(skillImage == 1){ // 火焰飛龍
+		gl_Position = offset * vec4(aPos2.x + aOffset.x, aPos2.y + aOffset.y, aPos2.z, 1.0);
+	}
+	else if(skillImage == 2){ // 朱利安柱子
+		vec4 t = vec4(aOffset2.x * time * 2, aOffset2.y, 0, 1);
+		vec4 a = vec4(1, 0 , 0, 0);
+		vec4 b = vec4(0, 1 , 0, 0);
+		vec4 c = vec4(0, 0 , 1, 0);
+		mat4 xOffset = mat4(a, b, c, t);
+		gl_Position = xOffset * offset * vec4((aPos.x + 0.1) * 2, (aPos.y + 0.07)* 8, aPos.z, 1.0);
+	}
+	if(isLeft == 0){
+		TexCoord = vec2(aTexCoord.x, aTexCoord.y);
+	}
+	else {
+		TexCoord = vec2(1.0 - aTexCoord.x, aTexCoord.y);
+	}
+	
+
+	skill_x = skillx;
+	skill_y = skilly;
+	skillImg = skillImage;
+}
