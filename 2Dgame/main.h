@@ -30,8 +30,6 @@ void ChangeSize(int w,int h);
 void display();
 void Keyboard(unsigned char key, int x, int y);
 void Keyboardup(unsigned char key, int x, int y);
-void Keyboard2(unsigned char key, int x, int y);
-void Keyboardup2(unsigned char key, int x, int y);
 
 
 void MenuEvents(int option);
@@ -289,6 +287,9 @@ glm::vec2 dragonOffset[5];
 glm::vec2 columnOffset[5];
 int deepSkillImage;
 int drawSkillDeep;
+int tflamePosX = 0, tflamePosY = 0;
+int rdragonPosX = 0, rdragonPosY = 0;
+int jcolumnPosX = 0, jcolumnPosY = 0;
 
 //-----------------------
 // deep-blood-variables
@@ -327,6 +328,9 @@ glm::vec2 fireOffset[5];
 glm::vec2 fireColumnOffset[5];
 int firenSkillImage;
 int drawSkillFiren;
+int bflamePosX = 0, bflamePosY = 0;
+int flandPosX = 0, flandPosY = 0;
+int fcolumnPosX = 0, fcolumnPosY = 0;
 
 //-----------------------
 // firen-blood-variables
@@ -353,6 +357,31 @@ mat4 projectionParticle;
 //light-variables
 //-----------------------
 int lightImg;
+
+
+//---------------------------------
+//collision-variables
+//----------------------------------
+int isFirenHurt = 0;
+int isDeepHurt = 0;
+void firenHurt() {
+	firenImage = 0;
+	fireny = 4;
+	if (offsetFirenBloodLength > 0) offsetFirenBloodLength -= 0.1f;
+	deltatimeFiren = firenTime; // 計時開始，到1.2秒後deep才能再站起來
+	isFirenHurt = 1;
+}
+void deepHurt() {
+	deepImage = 0;
+	deepy = 4;
+	if (offsetDeepBloodLength > 0) offsetDeepBloodLength -= 0.1f;
+	deltatime = deepTime; // 計時開始，到1.2秒後deep才能再站起來
+	isDeepHurt = 1;
+}
+
+
+
+
 //-----------------------
 // deep-vertices
 //-----------------------
@@ -436,7 +465,7 @@ unsigned int firenIndices[] = {
 };
 
 float firenPosX = 0, firenPosY = 0;
-
+glm::vec4 firenPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 //-----------------------
 // skill-vertices
 //-----------------------

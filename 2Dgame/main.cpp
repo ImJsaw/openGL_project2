@@ -190,7 +190,7 @@ void Deep_Timer(int val){
 				deepImage = 0; // 換回圖片0
 				deepx = 1; // 回到靜止圖
 				deepy = 1;
-				
+				isDeepHurt = 0;
 			}
 		}
 		else if (deepx != 6) { // deepx 往右走
@@ -202,17 +202,17 @@ void Deep_Timer(int val){
 	//---------------------------------------------
 	if (drawSkillDeep == 1 && deepSkillImage == 0) { // 冰火劍氣播放連續圖
 		
-		if (isLeftDeep == 0) {
+		if (isLeftDeep == 0 && deepTime - deltatime < 2) {
 			
 			offsetDeepSkill = translate((currentTime-deltatime)*10 * deep_interval * 0.0001f, 0, 0) * offsetDeepSkill;
 		}
-		else if (isLeftDeep == 1) {
+		else if (isLeftDeep == 1 && deepTime - deltatime < 2) {
 			
 			offsetDeepSkill = translate((currentTime - deltatime) * 10 * -deep_interval * 0.0001f, 0, 0) * offsetDeepSkill;
 		}
 
 		// skill 連續圖動畫
-		if (deepSkillx == 4 && deepSkilly == 2) {
+		if (deepSkillx == 4 && deepSkilly == 2 && deepTime - deltatime >= 2) {
 			deepSkillx = 1; // 回到靜止圖
 			deepSkilly = 1;
 			drawSkillDeep = 0;
@@ -224,6 +224,21 @@ void Deep_Timer(int val){
 			deepSkilly++;
 			deepSkillx = 1;
 		}
+
+
+		//-------------------------------------
+		//判定技能貼圖有沒有碰到firen
+		//------------------------------------
+		vec4 tflame = offsetDeepSkill * deepPosition;
+		tflamePosX = tflame.x;
+		tflamePosY = tflame.y;
+		
+		if (tflamePosX + 0.1 * (currentTime - deltatime) * 10 >= firenPosX - 0.1 && isFirenHurt == 0) {
+			firenHurt();
+		}
+		//------------------------------------
+
+
 
 	}
 	else if (drawSkillDeep == 1 && deepSkillImage == 1) { // 紅龍播放連續圖
@@ -250,6 +265,21 @@ void Deep_Timer(int val){
 			deepSkilly++;
 			deepSkillx = 1;
 		}
+
+		//-------------------------------------
+		//判定技能貼圖有沒有碰到firen
+		//------------------------------------
+		vec4 rdragon = offsetDeepSkill * deepPosition;
+		rdragonPosX = rdragon.x;
+		rdragonPosY = rdragon.y;
+
+		if (rdragonPosX + 0.5 >= firenPosX - 0.1 && isFirenHurt == 0) {
+			firenHurt();
+		}
+		//------------------------------------
+
+
+
 	}
 	else if (drawSkillDeep == 1 && deepSkillImage == 2) { // 朱利安柱子連續圖
 		if (isLeftDeep) offsetDeepSkill = translate(-0.2f, 0, 0) * offsetDeep;
@@ -268,6 +298,19 @@ void Deep_Timer(int val){
 			deepSkilly++;
 			deepSkillx = 1;
 		}
+
+		//-------------------------------------
+		//判定技能貼圖有沒有碰到firen
+		//------------------------------------
+		vec4 jcolumn = offsetDeepSkill * deepPosition;
+		jcolumnPosX = jcolumn.x;
+		jcolumnPosY = jcolumn.y;
+
+		if (jcolumnPosX + 0.6 * (currentTime - deltatime) * 2 >= firenPosX - 0.1 && isFirenHurt == 0) {
+			firenHurt();
+		}
+		//------------------------------------
+
 	}
 
 	//---------------------------------------------
@@ -422,6 +465,7 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 			else offsetDeepSkill = translate(0.4f, 0, 0) * offsetDeep;
 			drawSkillDeep = 1;
 
+			deltatime = deepTime;
 			break;
 		case 'x': // 火焰攻擊狀態，劍氣特效啟動
 		case 'X':
@@ -832,7 +876,7 @@ void Firen_Timer(int val) {
 				firenImage = 0; // 換回圖片0
 				firenx = 1; // 回到靜止圖
 				fireny = 1;
-
+				isFirenHurt = 0;
 			}
 		}
 		else if (firenx != 6) { // deepx 往右走
@@ -866,7 +910,17 @@ void Firen_Timer(int val) {
 			firenSkilly++;
 			firenSkillx = 1;
 		}
+		//-------------------------------------
+		//判定技能貼圖有沒有碰到deep
+		//------------------------------------
+		vec4 bflame = offsetFirenSkill * firenPosition;
+		bflamePosX = bflame.x;
+		bflamePosY = bflame.y;
 
+		if (bflamePosX - 0.08 * (currentTimeFiren - deltatimeFiren) * 1.5 <= deepPosX + 0.1 && isDeepHurt == 0) {
+			deepHurt();
+		}
+		//------------------------------------
 	}
 	else if (drawSkillFiren == 1 && firenSkillImage == 1) { // 噴火播放連續圖
 
@@ -892,6 +946,18 @@ void Firen_Timer(int val) {
 			firenSkilly++;
 			firenSkillx = 1;
 		}
+
+		//-------------------------------------
+		//判定技能貼圖有沒有碰到firen
+		//------------------------------------
+		vec4 fland = offsetFirenSkill * firenPosition;
+		flandPosX = fland.x;
+		flandPosY = fland.y;
+
+		if (flandPosX - 0.4 <= deepPosX + 0.1 && isDeepHurt == 0) {
+			deepHurt();
+		}
+		//------------------------------------
 	}
 	else if (drawSkillFiren == 1 && firenSkillImage == 2) { // 朱利安柱子連續圖
 		if (isLeftFiren) offsetFirenSkill = translate(-0.2f, 0, 0) * offsetFiren;
@@ -907,6 +973,18 @@ void Firen_Timer(int val) {
 			firenSkillx++;
 		}
 
+		//-------------------------------------
+		//判定技能貼圖有沒有碰到deep
+		//------------------------------------
+		vec4 fcolumn = offsetFirenSkill * firenPosition;
+		fcolumnPosX = fcolumn.x;
+		fcolumnPosY = fcolumn.y;
+
+		if (fcolumnPosX + 0.1 - 0.6 * (currentTimeFiren - deltatimeFiren) * 2 <= deepPosX + 0.1 && isDeepHurt == 0) {
+			deepHurt();
+		}
+		//------------------------------------
+		
 	}
 
 	//---------------------------------------------
@@ -981,10 +1059,8 @@ void JumpFiren_Timer(int val) {
 
 }
 
-
-
-
 void init() {
+
 	
 	initDeep();
 	initFiren();
@@ -1552,7 +1628,7 @@ void initFiren() {
 
 	is_move_when_jump_firen = 0;
 
-	isLeftFiren = 0;
+	isLeftFiren = 1;
 	firenDirection = -1;
 	firenImage = 0;
 
