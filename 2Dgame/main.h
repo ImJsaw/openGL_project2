@@ -51,6 +51,8 @@ float	currentTime = 0.0f;
 float	deltatime = 0.0f;
 float	time_for_a_jump = 0.5f;
 int is_move_when_jump_deep; // 0 為 非，1 為 向右，2 為 向左
+bool isEnemyHitByDeep(float enemyPosX, float enemyPosY, float skillRange);
+
 
 //===========================================
 //------------------------------------------
@@ -65,6 +67,8 @@ float	currentTimeFiren = 0.0f;
 float	deltatimeFiren = 0.0f;
 float	time_for_a_jump_firen = 0.5f;
 int is_move_when_jump_firen; 
+bool isEnemyHitByFiren(float enemyPosX, float enemyPosY, float skillRange);
+
 //------------------------------------------
 //===========================================
 
@@ -288,7 +292,8 @@ glm::vec2 columnOffset[5];
 int deepSkillImage;
 int drawSkillDeep;
 int tflamePosX = 0, tflamePosY = 0;
-int rdragonPosX = 0, rdragonPosY = 0;
+int isFirst = 1;
+int rdragonPosX = 0, rdragonPosY = 0, iniRdragonPosX = 0;
 int jcolumnPosX = 0, jcolumnPosY = 0;
 
 //-----------------------
@@ -328,8 +333,9 @@ glm::vec2 fireOffset[5];
 glm::vec2 fireColumnOffset[5];
 int firenSkillImage;
 int drawSkillFiren;
-int bflamePosX = 0, bflamePosY = 0;
-int flandPosX = 0, flandPosY = 0;
+int isFirstFiren = 1;
+int bflamePosX = 0, bflamePosY = 0, inibflamePos = 0;
+int flandPosX = 0, flandPosY = 0, iniflandPos = 0;
 int fcolumnPosX = 0, fcolumnPosY = 0;
 
 //-----------------------
@@ -566,7 +572,7 @@ unsigned int particleIndices[] = {
 glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), static_cast<GLfloat>(SCR_HEIGHT), 0.0f, -1.0f, 1.0f);
 glm::vec4 deepPosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-GLfloat dt = jump_interval * 0.001;
+GLfloat dt = jump_interval * 0.001f;
 
 //----------------------------------------
 //粒子系統下雨(learn opengl code)

@@ -191,6 +191,7 @@ void Deep_Timer(int val){
 				deepx = 1; // 回到靜止圖
 				deepy = 1;
 				isDeepHurt = 0;
+				isFirstFiren = 1; // 讓firenskill的範圍可以重新計算(在firen施放技能的firentimer裡面)
 			}
 		}
 		else if (deepx != 6) { // deepx 往右走
@@ -229,11 +230,15 @@ void Deep_Timer(int val){
 		//-------------------------------------
 		//判定技能貼圖有沒有碰到firen
 		//------------------------------------
+	
 		vec4 tflame = offsetDeepSkill * deepPosition;
 		tflamePosX = tflame.x;
 		tflamePosY = tflame.y;
-		
-		if (tflamePosX + 0.1 * (currentTime - deltatime) * 10 >= firenPosX - 0.1 && isFirenHurt == 0) {
+
+		/*if (tflamePosX + 0.1 * (currentTime - deltatime) * 10 >= firenPosX - 0.1 && isFirenHurt == 0) {
+			firenHurt();
+		}*/
+		if (isEnemyHitByDeep(firenPosX, firenPosY, tflamePosX + 0.2 * (currentTime - deltatime) * 10) && isFirenHurt == 0) {
 			firenHurt();
 		}
 		//------------------------------------
@@ -257,11 +262,12 @@ void Deep_Timer(int val){
 			deepSkillx = 1; // 回到靜止圖
 			deepSkilly = 1;
 			drawSkillDeep = 0;
+			isFirst = 1; // 讓碰撞判定在技能結束後再刷新
 		}
 		else if (deepSkillx != 2) { // x : 1 -> 2
 			deepSkillx++;
 		}
-		else if (deepSkillx == 2) { // y : 1 -> 2 ； x : 1 
+		else if (deepSkillx == 2 && (deepTime - deltatime) >= 0.2) { // y : 1 -> 2 ； x : 1 
 			deepSkilly++;
 			deepSkillx = 1;
 		}
@@ -269,13 +275,31 @@ void Deep_Timer(int val){
 		//-------------------------------------
 		//判定技能貼圖有沒有碰到firen
 		//------------------------------------
+	
 		vec4 rdragon = offsetDeepSkill * deepPosition;
 		rdragonPosX = rdragon.x;
 		rdragonPosY = rdragon.y;
-
-		if (rdragonPosX + 0.5 >= firenPosX - 0.1 && isFirenHurt == 0) {
-			firenHurt();
+		if (isFirst == 1) {
+			iniRdragonPosX = rdragonPosX;
+			isFirst = 0;
 		}
+		
+		
+
+		/*if (rdragonPosX + 0.5 >= firenPosX - 0.1 && isFirenHurt == 0) {
+			firenHurt();
+		}*/
+		if ((deepPosX - firenPosX) > 0) {
+			if (isEnemyHitByDeep(firenPosX, firenPosY, abs(rdragonPosX - iniRdragonPosX)) && isFirenHurt == 0) {
+				firenHurt();
+			}
+		}
+		else {
+			if (isEnemyHitByDeep(firenPosX, firenPosY, abs(rdragonPosX - iniRdragonPosX)) && isFirenHurt == 0) {
+				firenHurt();
+			}
+		}
+		
 		//------------------------------------
 
 
@@ -306,7 +330,10 @@ void Deep_Timer(int val){
 		jcolumnPosX = jcolumn.x;
 		jcolumnPosY = jcolumn.y;
 
-		if (jcolumnPosX + 0.6 * (currentTime - deltatime) * 2 >= firenPosX - 0.1 && isFirenHurt == 0) {
+		/*if (jcolumnPosX + 0.6 * (currentTime - deltatime) * 2 >= firenPosX - 0.1 && isFirenHurt == 0) {
+			firenHurt();
+		}*/
+		if (isEnemyHitByDeep(firenPosX, firenPosY, jcolumnPosX + 0.6 * (currentTime - deltatime) * 2) && isFirenHurt == 0) {
 			firenHurt();
 		}
 		//------------------------------------
@@ -369,16 +396,16 @@ void Jump_Timer(int val) {
 		if(deepPosX < 1 && deepPosX > -1) deepPosX += jump_interval * 0.001f* xMoveDeep;
 		if (deepPosY < 0 && deepPosY > -1) deepPosY += jump_interval * 0.001f* yMoveDeep;
 		deepx++;
-		if (deepPosY > 0 && deepController != 7) deepPosY = -0.01;
+		if (deepPosY > 0 && deepController != 7) deepPosY = -0.01f;
 		if (deepx == 8) deepx = 3;
 	}
 
 	//------------------------------------
 	//update pos and set the boundary
 	//------------------------------------
-	if (deepPosX > 1) deepPosX = 0.99;
-	if (deepPosX < -1) deepPosX = -0.99;
-	if (deepPosY < -0.89) deepPosY = -0.89;
+	if (deepPosX > 1) deepPosX = 0.99f;
+	if (deepPosX < -1) deepPosX = -0.99f;
+	if (deepPosY < -0.89) deepPosY = -0.89f;
 	offsetDeep = translate(deepPosX, deepPosY, 0);
 	cout << "deep Position : " << deepPosX << " , " << deepPosY << endl;
 
@@ -403,7 +430,7 @@ void Jump_Timer(int val) {
 		p.Life -= dt; // reduce life
 		if (p.Life > 0.0f){	// particle is alive, thus update
 			p.Position -= p.Velocity;
-			p.Color.a -= dt * 2.5;
+			p.Color.a -= dt * 2.5f;
 			
 			p.Color.a -= dt * 2.5f;
 		}
@@ -427,7 +454,7 @@ void Jump_Timer(int val) {
 		if (p.Life > 0.0f) {	// particle is alive, thus update
 			//p.Position += p.Velocity * dt;
 			p.Position += p.Velocity;
-			p.Color.a -= dt * 1.5;
+			p.Color.a -= dt * 1.5f;
 		}
 	}
 
@@ -459,7 +486,6 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 		case 'Z':
 			deepImage = 1;
 			deepy = 4;
-
 			deepSkillImage = 1; // 劍氣圖片
 			if (isLeftDeep) offsetDeepSkill = translate(-0.4f, 0, 0) * offsetDeep;
 			else offsetDeepSkill = translate(0.4f, 0, 0) * offsetDeep;
@@ -877,6 +903,7 @@ void Firen_Timer(int val) {
 				firenx = 1; // 回到靜止圖
 				fireny = 1;
 				isFirenHurt = 0;
+				
 			}
 		}
 		else if (firenx != 6) { // deepx 往右走
@@ -916,9 +943,17 @@ void Firen_Timer(int val) {
 		vec4 bflame = offsetFirenSkill * firenPosition;
 		bflamePosX = bflame.x;
 		bflamePosY = bflame.y;
+		if (isFirstFiren) {
+			inibflamePos = bflamePosX;
+			isFirstFiren = 0;
+		}
 
-		if (bflamePosX - 0.08 * (currentTimeFiren - deltatimeFiren) * 1.5 <= deepPosX + 0.1 && isDeepHurt == 0) {
+		/*if (bflamePosX - 0.08 * (currentTimeFiren - deltatimeFiren) * 1.5 <= deepPosX + 0.1 && isDeepHurt == 0) {
 			deepHurt();
+		}*/
+		if (isEnemyHitByFiren(deepPosX, deepPosY, abs(inibflamePos - bflamePosX) + 0.1 * (currentTimeFiren - deltatimeFiren) * 1.5) && isDeepHurt == 0) {
+			deepHurt();
+			
 		}
 		//------------------------------------
 	}
@@ -948,15 +983,26 @@ void Firen_Timer(int val) {
 		}
 
 		//-------------------------------------
-		//判定技能貼圖有沒有碰到firen
+		//判定技能貼圖有沒有碰到deep
 		//------------------------------------
 		vec4 fland = offsetFirenSkill * firenPosition;
 		flandPosX = fland.x;
 		flandPosY = fland.y;
 
-		if (flandPosX - 0.4 <= deepPosX + 0.1 && isDeepHurt == 0) {
+		/*if (isFirstFiren) {
+			iniflandPos = flandPosX;
+		}*/
+
+
+
+
+		/*if (flandPosX - 0.4 <= deepPosX + 0.1 && isDeepHurt == 0) {
+			deepHurt();
+		}*/
+		if (isEnemyHitByFiren(deepPosX, deepPosY, abs(iniflandPos - flandPosX) + 0.4) && isDeepHurt == 0) {
 			deepHurt();
 		}
+
 		//------------------------------------
 	}
 	else if (drawSkillFiren == 1 && firenSkillImage == 2) { // 朱利安柱子連續圖
@@ -980,7 +1026,10 @@ void Firen_Timer(int val) {
 		fcolumnPosX = fcolumn.x;
 		fcolumnPosY = fcolumn.y;
 
-		if (fcolumnPosX + 0.1 - 0.6 * (currentTimeFiren - deltatimeFiren) * 2 <= deepPosX + 0.1 && isDeepHurt == 0) {
+		/*if (fcolumnPosX + 0.1 - 0.6 * (currentTimeFiren - deltatimeFiren) * 2 <= deepPosX + 0.1 && isDeepHurt == 0) {
+			deepHurt();
+		}*/
+		if (isEnemyHitByFiren(deepPosX, deepPosY, fcolumnPosX + 0.1 + 0.6 * (currentTimeFiren - deltatimeFiren) * 2) && isDeepHurt == 0) {
 			deepHurt();
 		}
 		//------------------------------------
@@ -1043,21 +1092,39 @@ void JumpFiren_Timer(int val) {
 		if (firenPosX < 1 && firenPosX > -1) firenPosX += jumpFiren_interval * 0.001f* xMoveFiren;
 		if (firenPosY < 0 && firenPosY > -1) firenPosY += jumpFiren_interval * 0.001f* yMoveFiren;
 		firenx++;
-		if (firenPosY > 0 && firenController != 7) firenPosY = -0.01;
+		if (firenPosY > 0 && firenController != 7) firenPosY = -0.01f;
 		if (firenx == 8) firenx = 3;
 	}
 
 	//------------------------------------
 	//update pos and set the boundary
 	//------------------------------------
-	if (firenPosX > 1) firenPosX = 0.99;
-	if (firenPosX < -1) firenPosX = -0.99;
-	if (firenPosY < -0.89) firenPosY = -0.89;
+	if (firenPosX > 1) firenPosX = 0.99f;
+	if (firenPosX < -1) firenPosX = -0.99f;
+	if (firenPosY < -0.89) firenPosY = -0.89f;
 	offsetFiren = translate(firenPosX, firenPosY, 0);
 	cout << "firen Position : " << firenPosX << " , " << firenPosY << endl;
 
 
 }
+
+bool isEnemyHitByDeep(float enemyPosX, float enemyPosY,float skillRange) {
+	if (abs(enemyPosY - deepPosY) < 0.2) {//y in range ，上下不超過0.2
+		if (isLeftDeep && deepPosX - enemyPosX < skillRange) return true;// deep看向左邊，
+		if (!isLeftDeep && enemyPosX - deepPosX < skillRange) return true;// deep看向右邊，
+	}
+	return false;
+}
+
+bool isEnemyHitByFiren(float enemyPosX, float enemyPosY, float skillRange) {
+	if (abs(enemyPosY - firenPosY) < 0.2) {//y in range
+		if (isLeftFiren && firenPosX - enemyPosX < skillRange) return true;//x in range & left
+		if (!isLeftFiren && enemyPosX - firenPosX < skillRange) return true;//x in range & right
+	}
+	return false;
+}
+
+
 
 void init() {
 
@@ -1158,77 +1225,6 @@ void init() {
 	for (GLuint i = 0; i < particleNum; ++i)
 		particles.push_back(Particle());
 
-
-	/*//--------------------------
-	//particle system(Rain)
-	//--------------------------
-
-	proj_matrix = scale(1, 1, 1);
-
-
-	// debug，記得改shader
-	ShaderInfo particleRainShader[] = {
-		{ GL_VERTEX_SHADER, "point_sprite.vp" },//vertex shader
-	{ GL_FRAGMENT_SHADER, "point_sprite.fp" },//fragment shader
-	{ GL_NONE, NULL } };
-	programParticleRain = LoadShaders(particleRainShader);//讀取shader
-
-	glUseProgram(programParticleRain);//uniform參數數值前必須先use shader
-
-	glGenVertexArrays(1, &VAOpr);
-	glBindVertexArray(VAOpr);
-
-	proj_location = glGetUniformLocation(programParticleRain, "proj_matrix");
-	time_Loc = glGetUniformLocation(programParticleRain, "time");
-
-	glGenVertexArrays(1, &VAOpr);
-	glBindVertexArray(VAOpr);
-
-	glGenBuffers(1, &VBOpr);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOpr);
-	glBufferData(GL_ARRAY_BUFFER, NUM_STARS * sizeof(star_t), NULL, GL_STATIC_DRAW);
-
-	star = (star_t *)glMapBufferRange(GL_ARRAY_BUFFER, 0, NUM_STARS * sizeof(star_t), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-	int i;
-
-	for (i = 0; i < NUM_STARS; i++)
-	{
-		star[i].position[0] = (random_float() * 2.0f);
-		star[i].position[1] = (random_float() * 2.0f);
-		printf("star = %f %f\n", star[i].position[0], star[i].position[1]);
-		star[i].position[2] = 0.0f;
-		star[i].color[0] = 0.8f + random_float() * 0.2f;
-		star[i].color[1] = 0.8f + random_float() * 0.2f;
-		star[i].color[2] = 0.8f + random_float() * 0.2f;
-		star[i].life = (random_float() + 1); // 1-2
-		
-	}
-
-
-	glUnmapBuffer(GL_ARRAY_BUFFER);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(star_t), NULL);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(star_t), (void *)sizeof(glm::vec3));
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(star_t), (void *)(2 * sizeof(glm::vec3)));
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
-
-	glEnable(GL_TEXTURE_2D);
-	glActiveTexture(GL_TEXTURE0);
-	TextureData tdata = Common::Load_png("sys/star.png");
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glGenTextures(1, &m_texture);
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tdata.width, tdata.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tdata.data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);*/
 
 	//--------------------------
 	//particle system(rain--by learn opengl)
@@ -1887,9 +1883,9 @@ void display() {
 	
 	if (isDeepDie == 1 || isFirenDie == 1) {
 		if (frameColor.x > 0.0) {
-			frameColor.x -= 0.005;
-			frameColor.y -= 0.005;
-			frameColor.z -= 0.005;
+			frameColor.x -= 0.005f;
+			frameColor.y -= 0.005f;
+			frameColor.z -= 0.005f;
 		}
 		printf("frameColor.x = %f\n", frameColor.x);
 		
@@ -1958,7 +1954,7 @@ void display() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glUseProgram(programParticleRain2);
 	glBindVertexArray(VAOpr2);
-	for (int i = 0; i < particleRainNum; i++) {
+	for (unsigned int i = 0; i < particleRainNum; i++) {
 		if (particleRain[i].Life > 0.0f) {
 			glUniform2fv(offsetParticleRainID, 1, &particleRain[i].Position[0]);
 			glUniform4fv(colorParticleRainID, 1, &particleRain[i].Color[0]);
@@ -2023,7 +2019,7 @@ void display() {
 	glUseProgram(programParticle);
 	glBindVertexArray(VAOp);
 	
-	for (int i = 0; i < particleNum; i++) {
+	for (unsigned int i = 0; i < particleNum; i++) {
 		if (particles[i].Life > 0.0f) {
 			glUniform2fv(offsetParticleID, 1, &particles[i].Position[0]);
 			glUniform4fv(colorParticleID, 1, &particles[i].Color[0]);
@@ -2380,7 +2376,7 @@ void ParticleSpeedMenuEvents(int option) {
 		break;
 	case 1:
 		particleSpeed = 0.05f;
-		rainSpeed = 0.1;
+		rainSpeed = 0.1f;
 		break;
 	case 2:
 		particleSpeed = 0.5f;
