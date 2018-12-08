@@ -1,7 +1,7 @@
 #include <Common.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <STB/stb_image.h>
+#include <stb_image.h>
 
 //#pragma comment (lib, "glew32.lib")
 //#pragma comment(lib, "freeglut.lib")
@@ -137,6 +137,35 @@ TextureData Common::Load_png(const char* path, bool mirroredY)
 {
 	TextureData texture;
 	int n;
+	stbi_uc *data = stbi_load(path, &texture.width, &texture.height, &n, 4);
+	if (data != NULL)
+	{
+		texture.data = new unsigned char[texture.width * texture.height * 4 * sizeof(unsigned char)];
+		memcpy(texture.data, data, texture.width * texture.height * 4 * sizeof(unsigned char));
+		// vertical-mirror image data
+		if (mirroredY)
+		{
+			for (size_t i = 0; i < texture.width; i++)
+			{
+				for (size_t j = 0; j < texture.height / 2; j++)
+				{
+					for (size_t k = 0; k < 4; k++) {
+						std::swap(texture.data[(j * texture.width + i) * 4 + k], texture.data[((texture.height - j - 1) * texture.width + i) * 4 + k]);
+					}
+				}
+			}
+		}
+		stbi_image_free(data);
+		printf("texture load complete at path : %s\n", path);
+	}
+	return texture;
+}
+
+TextureData Common::Load_png_inverse(const char* path, bool mirroredY)
+{
+	TextureData texture;
+	int n;
+	stbi_set_flip_vertically_on_load(true); // 把照片轉正
 	stbi_uc *data = stbi_load(path, &texture.width, &texture.height, &n, 4);
 	if (data != NULL)
 	{

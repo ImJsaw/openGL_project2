@@ -110,10 +110,13 @@ void Deep_Timer(int val){
 			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
 			offsetDeepSkill = translate(deep_interval * 0.001f, 0, 0) * offsetDeepSkill;
 			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
+			if (deepPosX > -0.4) for (int i = 0; i < 6; i++) quadOffset1[i] += jump_interval * 0.0002f;
 		}
 		else if (isLeftDeep == 1) {
 			offsetDeepSkill = translate(-deep_interval * 0.001f, 0, 0) * offsetDeepSkill;
 			 if (deepPosX > -1 ) deepPosX -= deep_interval * 0.0005f;
+			if (deepPosX < 0.2) for (int i = 0; i < 6; i++) quadOffset1[i] -= jump_interval * 0.0002f;
+
 		}
 
 		// deep連續圖動畫
@@ -138,10 +141,14 @@ void Deep_Timer(int val){
 		if (isLeftDeep == 0) {
 			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
 			if (deepPosX < 1) deepPosX += deep_interval * 0.0005f;
+			if (deepPosX > -0.4) for (int i = 0; i < 6; i++) quadOffset1[i] += jump_interval * 0.0002f;
+			
 		}
 		else if (isLeftDeep == 1) {
 			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
 			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
+			if (deepPosX < 0.2) for (int i = 0; i < 6; i++) quadOffset1[i] -= jump_interval * 0.0002f;
+
 		}
 
 		if (deepx == 10) {
@@ -157,10 +164,12 @@ void Deep_Timer(int val){
 		if (isLeftDeep == 0) {
 			//offset = translate(deep_interval * 0.0005f, 0, 0) * offset;
 			if(deepPosX < 1)if (deepPosX > -1) deepPosX += deep_interval * 0.0005f;
+			if (deepPosX > -0.4) for (int i = 0; i < 6; i++) quadOffset1[i] += jump_interval * 0.0002f;
 		}
 		else if (isLeftDeep == 1) {
 			//offset = translate(-deep_interval * 0.0005f, 0, 0) * offset;
 			if (deepPosX > -1) deepPosX -= deep_interval * 0.0005f;
+			if (deepPosX < 0.2) for (int i = 0; i < 6; i++) quadOffset1[i] -= jump_interval * 0.0002f;
 		}
 
 		if (deepx == 8) {
@@ -198,6 +207,14 @@ void Deep_Timer(int val){
 			deepx++;
 		}
 	}
+	//--------------------------------------------------
+	//判定捲動地圖有沒有捲超過(0.0-0.2)
+	//--------------------------------------------------
+	if (quadOffset1[0] > 0.2) for (int i = 0; i < 6; i++) quadOffset1[i] = 0.2;
+	if (quadOffset1[0] < 0.0) for (int i = 0; i < 6; i++) quadOffset1[i] = 0.0;
+
+
+
 	//---------------------------------------------
 	//技能特效連續圖
 	//---------------------------------------------
@@ -345,6 +362,19 @@ void Deep_Timer(int val){
 	//---------------------------------------------
 	offsetDeepBlood = translate(0, 0.16f, 0) * offsetDeep; // 讓血條一直待在deep上方
 	
+	//-----------------------------------------
+	//火炬動畫
+	//-----------------------------------------
+	if(fireplace != 4) fireplace++;
+	else if (fireplace == 4) {
+		fireplace = 0;
+		if (fireplaceImg == 0) {
+			fireplaceImg++;
+		}
+		else {
+			fireplaceImg = 0;
+		}
+	}
 }
 void Jump_Timer(int val) {
 
@@ -391,13 +421,24 @@ void Jump_Timer(int val) {
 			}
 		}
 	}
-	else if(deepDirection != -1){//normal move
-		//offset = translate(jump_interval * 0.001f* xMove, jump_interval * 0.001f* yMove, 0) * offset;
-		if(deepPosX < 1 && deepPosX > -1) deepPosX += jump_interval * 0.001f* xMoveDeep;
-		if (deepPosY < 0 && deepPosY > -1) deepPosY += jump_interval * 0.001f* yMoveDeep;
+	else if(deepDirection != -1){ // normal move
+		// offset = translate(jump_interval * 0.001f* xMove, jump_interval * 0.001f* yMove, 0) * offset;
+		if (deepPosX < 1 && deepPosX > -1) {
+			deepPosX += jump_interval * 0.001f* xMoveDeep;
+			if (deepPosX > -0.4&& xMoveDeep == 1) for(int i = 0 ; i < 6 ; i++) quadOffset1[i] += jump_interval * 0.0002f;
+			if (deepPosX < 0.2 && xMoveDeep == -1) for (int i = 0; i < 6; i++) quadOffset1[i] -= jump_interval * 0.0002f;
+			
+		}
+		if (deepPosY < 0 && deepPosY > -1) {
+			deepPosY += jump_interval * 0.001f* yMoveDeep;
+		}
 		deepx++;
-		if (deepPosY > 0 && deepController != 7) deepPosY = -0.01f;
-		if (deepx == 8) deepx = 3;
+		if (deepPosY > 0 && deepController != 7) {
+			deepPosY = -0.01f;
+		}
+		if (deepx == 8) {
+			deepx = 3;
+		}
 	}
 
 	//------------------------------------
@@ -406,6 +447,8 @@ void Jump_Timer(int val) {
 	if (deepPosX > 1) deepPosX = 0.99f;
 	if (deepPosX < -1) deepPosX = -0.99f;
 	if (deepPosY < -0.89) deepPosY = -0.89f;
+	if (quadOffset1[0] > 0.2) for (int i = 0; i < 6; i++) quadOffset1[i] = 0.2;
+	if(quadOffset1[0] < 0.0) for (int i = 0; i < 6; i++) quadOffset1[i] = 0.0;
 	offsetDeep = translate(deepPosX, deepPosY, 0);
 	cout << "deep Position : " << deepPosX << " , " << deepPosY << endl;
 
@@ -463,7 +506,7 @@ void Jump_Timer(int val) {
 //  deepController : 跳7,走65,站4:左   右:0站,12走,3跳
 // deepDirection : 0左 1上 2右 3下
 void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
-	if (isDeepDie == 0 || isFirenDie == 0) { // 如果還沒死，按了按鍵才有用
+	if (isDeepDie == 0 && isFirenDie == 0) { // 如果還沒死，按了按鍵才有用
 		switch (key) {
 		case 'q': // 扣血
 		case 'Q':
@@ -688,7 +731,7 @@ void Keyboard(unsigned char key, int x, int y) { // 各種按鈕按下去的反應
 }
 void Keyboardup(unsigned char key, int x, int y) { // 一般走路按鈕放開即停止
 
-	if (isDeepDie == 0 || isFirenDie == 0) {// 如果還沒死，放開按鍵才有用
+	if (isDeepDie == 0 && isFirenDie == 0) {// 如果還沒死，放開按鍵才有用
 		switch (key) {
 		case 'W': // 往上走
 		case 'w':
@@ -1110,16 +1153,17 @@ void JumpFiren_Timer(int val) {
 
 bool isEnemyHitByDeep(float enemyPosX, float enemyPosY,float skillRange) {
 	if (abs(enemyPosY - deepPosY) < 0.2) {//y in range ，上下不超過0.2
-		if (isLeftDeep && deepPosX - enemyPosX < skillRange) return true;// deep看向左邊，
-		if (!isLeftDeep && enemyPosX - deepPosX < skillRange) return true;// deep看向右邊，
+		
+		if (isLeftDeep && (deepPosX - enemyPosX) >= 0 && deepPosX - enemyPosX < skillRange) return true;// deep看向左邊，
+		else if (!isLeftDeep && (deepPosX - enemyPosX) <= 0 && enemyPosX - deepPosX < skillRange) return true;// deep看向右邊，
 	}
 	return false;
 }
 
 bool isEnemyHitByFiren(float enemyPosX, float enemyPosY, float skillRange) {
 	if (abs(enemyPosY - firenPosY) < 0.2) {//y in range
-		if (isLeftFiren && firenPosX - enemyPosX < skillRange) return true;//x in range & left
-		if (!isLeftFiren && enemyPosX - firenPosX < skillRange) return true;//x in range & right
+		if (isLeftFiren && (firenPosX - enemyPosX) >= 0 && firenPosX - enemyPosX < skillRange) return true;//x in range & left
+		else if (!isLeftFiren && (firenPosX - enemyPosX) <= 0 && enemyPosX - firenPosX < skillRange) return true;//x in range & right
 	}
 	return false;
 }
@@ -1128,8 +1172,8 @@ bool isEnemyHitByFiren(float enemyPosX, float enemyPosY, float skillRange) {
 
 void init() {
 
-	
 	initDeep();
+	
 	initFiren();
 
 	//----------------------------
@@ -1164,12 +1208,126 @@ void init() {
 	// texture coord attribute(for image1)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
-	
+
 	glUseProgram(programBack);
 
-	backgroundImg = loadTexture("bk/back03.jpg");
+	//backgroundImg = loadTexture("bk/castle.png");
+	// causing strange loading
 
+	//----------------------------------------------------
+	const std::string ProjectName = "bk/castle.png";
+	TextureData tdata = Common::Load_png((ProjectName).c_str());
+
+	//Generate empty texture
+	glGenTextures(1, &backgroundImg);
+
+	glBindTexture(GL_TEXTURE_2D, backgroundImg);
+
+	//Do texture setting
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tdata.width, tdata.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tdata.data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//-----------------------------------------------------------
 	glUniform1i(glGetUniformLocation(programBack, "back"), 0);
+
+
+	//-----------------------
+	// fireplace-setting
+	//-----------------------
+	ShaderInfo fpShader[] = {
+		{ GL_VERTEX_SHADER, "fireplace.vp" },//vertex shader
+	{ GL_FRAGMENT_SHADER, "fireplace.fp" },//fragment shader
+	{ GL_NONE, NULL } };
+	programFirePlace = LoadShaders(fpShader);//讀取shader
+
+	glUseProgram(programFirePlace);//uniform參數數值前必須先use shader
+
+	//---------------------------------
+	//dragon instance initialize(三個火炬的位置offset)
+	//---------------------------------
+	int index = 0;
+	for (int y = -1; y < 2; y++)
+	{
+		glm::vec2 translation;
+		translation.x = y * 0.75;
+		translation.y = 0.8f;
+		firePlaceOffset[index++] = translation;
+	}
+	firePlaceOffset[0].x = -0.77;
+	firePlaceOffset[1].x = 0.048;
+	firePlaceOffset[2].x = 0.86;
+
+	// --------------------------------------
+	// store instance data in an array buffer( 一次生成三個火炬，該VBO放置算好的偏差值 )
+	// --------------------------------------
+	unsigned int instanceVBOfp;
+	glGenBuffers(1, &instanceVBOfp);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBOfp);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 3, &firePlaceOffset[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
+	// --------------------------------------
+	// 一般的 VAO VBO EBO
+	// --------------------------------------
+	glGenVertexArrays(1, &VAOfp);
+	glGenBuffers(1, &VBOfp);
+	glGenBuffers(1, &EBOfp);
+
+	glBindVertexArray(VAOfp);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOfp);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fpVertices), fpVertices, GL_STATIC_DRAW); // A+B的空間中先綁定A
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOfp);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(fpIndices), fpIndices, GL_STATIC_DRAW);
+
+	//---------------------------------
+	//sword-light
+	//---------------------------------
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	// texture coord attribute(for image)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+
+
+
+	// 火炬的偏差值，另外傳入(因為使用的是不同的VBO)
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBOfp); // this attribute comes from a different vertex buffer
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0); // 從instanceVBO傳入的
+	glEnableVertexAttribArray(3);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glVertexAttribDivisor(3, 1); // tell OpenGL this is an instanced vertex attribute.
+	//(index of attribpointer, update/indice)
+
+
+
+	glUseProgram(programFirePlace);
+
+	for (int i = 0; i < 2; i++) {
+		firePlaceSheets[i] = new Sprite2D();
+	}
+	
+	firePlaceSheets[0]->Init("sys/fireplace0.png", 1, 5, 5);
+	firePlaceSheets[1]->Init("sys/fireplace1.png", 1, 5, 5);
+
+
+	//glUniform1i(glGetUniformLocation(programFirePlace, "firePic"), 0);
+
+	fireplaceID = glGetUniformLocation(programFirePlace, "seq"); // 少了這行，讓offset沒有傳入，使得position*offset未知，圖跑不出來
+
 
 	//--------------------------
 	//particle system
@@ -1233,6 +1391,7 @@ void init() {
 
 	rainLife = 1;
 	rainSpeed = 1;
+
 	ShaderInfo particleShaderRain2[] = {
 		{ GL_VERTEX_SHADER, "particle_rain.vp" },//vertex shader
 	{ GL_FRAGMENT_SHADER, "particle_rain.fp" },//fragment shader
@@ -1264,7 +1423,7 @@ void init() {
 
 	glUseProgram(programParticleRain2);
 
-	particleRainImg = loadTexture("sys/star.png");
+	particleRainImg = loadTexture("sys/water.png");
 
 	glUniform1i(glGetUniformLocation(programParticleRain2, "sprite"), 0);
 
@@ -1272,6 +1431,7 @@ void init() {
 	colorParticleRainID = glGetUniformLocation(programParticleRain2, "color");
 	particleTimeRainID = glGetUniformLocation(programParticleRain2, "time");
 	particleLifeRainID = glGetUniformLocation(programParticleRain2, "life");
+	particleRotateRainID = glGetUniformLocation(programParticleRain2, "rotate");
 
 	for (GLuint i = 0; i < particleRainNum; ++i)
 		particleRain.push_back(Particle());
@@ -1321,6 +1481,29 @@ void init() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	frameColorID = glGetUniformLocation(programFrame, "color");
+	frameTimeID = glGetUniformLocation(programFrame, "time");
+
+	//----------------------------------------------------
+	const std::string ProjectName2 = "sys/magic_circle.png";
+	TextureData tdata2 = Common::Load_png((ProjectName2).c_str());
+
+	//Generate empty texture
+	glGenTextures(1, &frameMagic);
+
+	glBindTexture(GL_TEXTURE_2D, frameMagic);
+
+	//Do texture setting
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tdata2.width, tdata2.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tdata2.data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//-----------------------------------------------------------
+
+
+	glUniform1i(glGetUniformLocation(programFrame, "magic"), 1);
+
 
 	//--------------------------------------------------------
 	//point light zone
@@ -1334,7 +1517,7 @@ void init() {
 	glUseProgram(programLight);//uniform參數數值前必須先use shader
 
 	lightPosID = glGetUniformLocation(programLight, "lightPos");
-	lightImg = loadTexture("sys/star.png");
+	lightImg = loadTexture("sys/magic_circle0.png");
 	glUniform1i(glGetUniformLocation(programLight, "sprite"), 0);
 }
 
@@ -1895,6 +2078,8 @@ void display() {
 		glUniform4fv(frameColorID, 1, &frameColor[0]);
 	}
 
+	glUniform1f(frameTimeID, currentTime);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
 
@@ -1905,7 +2090,7 @@ void display() {
 	//夾心餅乾，夾在framebuffer中間
 	//-------------------------------------------
 	//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//-----------------------
 	// background-draw
@@ -1924,14 +2109,14 @@ void display() {
 	//light position draw
 	//-----------------------------------
 	glUseProgram(programLight);
-	
+
 	glUniform3fv(lightPosID, 1, &lightPosForLight[0]);
 
 	glEnable(GL_POINT_SPRITE);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBindVertexArray(VAOpr);
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, lightImg);
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -1942,6 +2127,28 @@ void display() {
 	glDisable(GL_BLEND);
 	glDisable(GL_PROGRAM_POINT_SIZE);
 
+
+
+	//-----------------------
+	// fireplace-draw
+	//-----------------------
+	// 在deep之後畫skill，skill才能跟deep一起移動
+	glUseProgram(programFirePlace);
+	glBindVertexArray(VAOfp);
+	glUniform1i(fireplaceID, fireplace);
+	// bind textures on corresponding texture units
+
+	glActiveTexture(GL_TEXTURE0);
+	firePlaceSheets[fireplaceImg]->Enable();
+
+	// render container
+	glUseProgram(programFirePlace);
+	glBindVertexArray(VAOfp);
+
+	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 3);
+	glBindVertexArray(0);
+
+	firePlaceSheets[fireplaceImg]->Disable();
 
 
 
@@ -1960,6 +2167,9 @@ void display() {
 			glUniform4fv(colorParticleRainID, 1, &particleRain[i].Color[0]);
 			glUniform1f(particleTimeRainID, currentTime);
 			glUniform1f(particleLifeRainID, particleRain[i].Life);
+			rotateRain = rotate(rainAngle, 0, 0, 1); // 負號：順時針
+			glUniformMatrix4fv(particleRotateRainID, 1, false, &rotateRain[0][0]);
+
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, particleRainImg);
 			glBindVertexArray(VAOpr2);
@@ -2201,7 +2411,7 @@ void display() {
 
 
 	//------------------------------------
-	//framebufferobject--mainmap(因為原本畫在自己的framebuffer，回到原本的buffer)
+	//framebufferobject--mainmap(因為原本畫在自己的framebuffer，回到原本的buffer才能畫到opengl螢幕)
 	//-----------------------------------
 
 
@@ -2215,19 +2425,27 @@ void display() {
 	glUseProgram(programFrame);
 	glBindVertexArray(quadVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices1), &quadVertices1, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices1) + sizeof(quadOffset1), quadVertices1, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(quadVertices1), sizeof(quadOffset1), quadOffset1);
 
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(42 * sizeof(float)));
 	
 
 
 	//screenShader.use();
 	glUseProgram(programFrame);
 	glBindVertexArray(quadVAO);
-	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, frameMagic);	// use the color attachment texture as the texture of the quad plane
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
@@ -2247,16 +2465,25 @@ void display() {
 	glUseProgram(programFrame);
 	glBindVertexArray(quadVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices2), &quadVertices2, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices2) + sizeof(quadOffset2), &quadVertices2, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(quadVertices2), sizeof(quadOffset2), quadOffset2);
+
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 1 * sizeof(float), (void*)(42 * sizeof(float)));
 
 	//screenShader.use();
 	glUseProgram(programFrame);
 	glBindVertexArray(quadVAO);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, frameMagic);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
@@ -2288,10 +2515,8 @@ GLuint FirstUnusedParticle()
 	lastUsedParticle = 0;
 	return 0;
 }
-
 void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offsett)
 {
-	//GLfloat random = ((rand() % 100) - 50) / 10.0f;
 	GLfloat random = ((rand() % 100) - 99) / 5000.0f;
 	GLfloat random2 = ((rand() % 100) - 99) / 5000.0f;
 	GLfloat rColor = 0.5f + ((rand() % 100) / 100.0f);
@@ -2302,8 +2527,6 @@ void RespawnParticle(Particle &particle, glm::vec2 charPos, glm::vec2 offsett)
 	particle.Life = particleLife;
 	particle.Velocity = vec2(dt, dt) * particleSpeed;
 	particle.Velocity = vec2(particle.Velocity.x * particleDir.x, particle.Velocity.y * particleDir.y);
-	
-	//printf("%d , %d\n", particle.Position.x, particle.Position.y);
 }
 
 GLuint FirstUnusedParticleRain()
@@ -2394,18 +2617,22 @@ void ParticleDirectionMenuEvents(int option) {
 	case 0:
 		particleDir = vec2(1.0, 1.0);
 		rainDir = vec2(1.0, 1.0);
+		rainAngle = -45.0f;
 		break;
 	case 1:
 		particleDir = vec2(1.0, -1.0);
 		rainDir = vec2(1.0, -1.0);
+		rainAngle = -135.0f;
 		break;
 	case 2:
 		particleDir = vec2(-1.0, -1.0);
 		rainDir = vec2(-1.0, -1.0);
+		rainAngle = 135.0f;
 		break;
 	case 3:
 		particleDir = vec2(-1.0, 1.0);
 		rainDir = vec2(-1.0, 1.0);
+		rainAngle = 45.0f;
 		break;
 	}
 }

@@ -116,6 +116,8 @@
     <None Include="firenblood.vp" />
     <None Include="firenskill.fp" />
     <None Include="firenskill.vp" />
+    <None Include="fireplace.fp" />
+    <None Include="fireplace.vp" />
     <None Include="framebuffer.fp" />
     <None Include="framebuffer.vp" />
     <None Include="light.fp" />

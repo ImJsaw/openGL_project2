@@ -62,6 +62,7 @@ public:
 	static bool CheckGLError();
 	static void PrintGLError();
 	static TextureData Load_png(const char* path, bool mirroredY = true);
+	static TextureData Load_png_inverse(const char* path, bool mirroredY = true);
 	static char** LoadShaderSource(const char* file);
 	static void FreeShaderSource(char** srcp);
 

@@ -10,12 +10,14 @@ out vec4 ParticleColor;
 uniform vec2 offset;
 uniform vec4 color;
 uniform float life;
-
+uniform float time;
+uniform mat4 rotate;
 
 void main()
 {
-    float scale = 0.8;
+    float scale = 1.5;
     TexCoords = aTexCoord;
     ParticleColor = color;
-	gl_Position = vec4((aPos.xy * scale) + offset, 0.0, 1.0);
+	//gl_Position = vec4((aPos.xy * scale) + offset, 0.0, 1.0);
+	gl_Position = rotate * vec4((aPos.xy * scale), 0.0, 1.0) + vec4(offset, 0.0, 0.0);
 }

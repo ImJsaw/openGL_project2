@@ -99,7 +99,7 @@ GLuint EBOdb;
 
 //------------------------------------------
 //===========================================
-GLuint VAOf; // for deep
+GLuint VAOf; // for firen
 GLuint VBOf;
 GLuint EBOf;
 
@@ -132,6 +132,10 @@ GLuint VAOpr2;
 GLuint VBOpr2;
 GLuint EBOpr2;
 
+GLuint VAOfp;
+GLuint VBOfp;
+GLuint EBOfp;
+
 GLuint quadVAO;
 GLuint quadVBO;
 unsigned int framebuffer; // 這三個buffer是要做整張畫面的特效使用
@@ -151,9 +155,11 @@ unsigned int programFirenBlood;
 //------------------------------------------
 
 unsigned int programBack;
+unsigned int programFirePlace;
 unsigned int programParticle;
 unsigned int programParticleRain;
 unsigned int programParticleRain2;
+
 
 unsigned int programFrame;
 unsigned int programLight;
@@ -248,10 +254,12 @@ GLuint offsetParticleRainID;
 GLuint colorParticleRainID;
 GLuint particleTimeRainID;
 GLuint particleLifeRainID;
+GLuint particleRotateRainID;
 //-------------------------------
 //framebuffer-shader ID
 //-------------------------------
 GLuint frameColorID;
+GLuint frameTimeID;
 //-------------------------------
 //light-shader ID
 //-------------------------------
@@ -350,11 +358,33 @@ float offsetFirenBloodLength; // 扣血
 //-----------------------
 // background-variables
 //-----------------------
-int backgroundImg;
+GLuint backgroundImg;
 
+//-----------------------------
+// fireplace-variables
+//-----------------------------
+float fpVertices[] = {
+	// positions							// texture coords for img twinsflame/bat/sword-blow(orange/red/blue/yellow)
+	0.065f,  0.17f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+	0.065f, -0.17f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+	-0.065f, -0.17f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+	-0.065f,  0.17f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
+};
+unsigned int fpIndices[] = {
+	0, 1, 3, // first triangle
+	1, 2, 3  // second triangle
+};
+
+
+glm::vec2 firePlaceOffset[3];
+Sprite2D* firePlaceSheets[2];
+GLuint fireplaceID;
+int fireplace = 0;
+int fireplaceImg = 0;
 //-----------------------
 //particle-variables
 //-----------------------
+
 int particleImg;
 mat4 offsetParticle;
 mat4 projectionParticle;
@@ -514,11 +544,18 @@ unsigned int firenBloodIndices[] = {
 //-----------------------
 // background-variables
 //-----------------------
-float backVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+/*float backVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// positions                            // texCoords
 	 1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.4f, 1.0f,   // up-right
 	 1.0f, -1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // bottom-right
 	-1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.5f, 0.0f, //bottom-left
+	-1.0f,  1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f, //up-left 
+};*/
+float backVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions                            // texCoords
+	 1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,   // up-right
+	 1.0f, -1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // bottom-right
+	-1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, //bottom-left
 	-1.0f,  1.0f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f, //up-left 
 };
 unsigned int backIndices[] = {
@@ -585,35 +622,55 @@ GLuint particleRainNum = 2000; // particle總數
 float rainLife, rainSpeed;
 vec2 rainDir = vec2(1.0, 1.0);
 GLuint particleRainImg;
-
-
+mat4 rotateRain;
+GLfloat rainAngle = -45.0f;
 
 //--------------------------------------
 //framebufferobject小地圖
 //--------------------------------------
 float quadVertices2[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	// 小地圖：右上-0.5,1.0：右下-0.5,0.5：左下-1.0,0.5：左上-1.0,1.0
-	// positions   // texCoords
-	0.5,   1.0,  0.0f, 1.0f, // 左上
-	0.5,   0.5,  0.0f, 0.0f, // 左下
-	1.0,   0.5,  1.0f, 0.0f, // 右下
+	// positions                 // texCoords
+	0.5, 1.0,   0.0, 0.0, 0.0,  0.0f, 1.0f, // 左上
+	0.5, 0.5,   0.0, 0.0, 0.0,  0.0f, 0.0f, // 左下
+	1.0, 0.5,   0.0, 0.0, 0.0,  1.0f, 0.0f, // 右下
 
-	0.5,  1.0f,  0.0f, 1.0f, // 左上
-	1,   0.5,  1.0f, 0.0f, // 右下
-	1,   1.0,  1.0f, 1.0f // 右上
+	0.5, 1.0f,  0.0, 0.0, 0.0,   0.0f, 1.0f, // 左上
+	1.0, 0.5,   0.0, 0.0, 0.0,   1.0f, 0.0f, // 右下
+	1.0, 1.0,   0.0, 0.0, 0.0,   1.0f, 1.0f // 右上
 };
+float quadOffset2[] = {
+	0.0,
+	0.0,
+	0.0,
+	0.0,
+	0.0,
+	0.0
+};
+
+
+//大地圖
 float quadVertices1[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-	// positions   // texCoords
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	-1.0f, -1.0f,  0.0f, 0.0f,
-	1.0f, -1.0f,  1.0f, 0.0f,
+	// positions                   // texCoords
+	-1.0f,  1.0f,  1.0, 1.0, 1.0,  0.0f, 1.0f,
+	-1.0f, -1.0f,  1.0, 1.0, 1.0,  0.0f, 0.0f,
+	1.0f, -1.0f,   1.0, 1.0, 1.0,  0.8f, 0.0f,
 
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	1.0f, -1.0f,  1.0f, 0.0f,
-	1.0f,  1.0f,  1.0f, 1.0f
+	-1.0f,  1.0f,  1.0, 1.0, 1.0,   0.0f, 1.0f,
+	1.0f, -1.0f,   1.0, 1.0, 1.0,   0.8f, 0.0f,
+	1.0f,  1.0f,   1.0, 1.0, 1.0,   0.8f, 1.0f
 };
-vec4 frameColor = vec4(1.0, 1.0, 1.0, 1.0);
+float quadOffset1[] = {
+	0.0,
+	0.0,
+	0.0,
+	0.0,
+	0.0,
+	0.0
+};
 
+vec4 frameColor = vec4(1.0, 1.0, 1.0, 1.0);
+GLuint frameMagic;
 
 //---------------------------------------------
 //yao chih yuan code

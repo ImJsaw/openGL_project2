@@ -116,6 +116,12 @@
     <None Include="firenskill.vp">
       <Filter>shader</Filter>
     </None>
+    <None Include="fireplace.vp">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="fireplace.fp">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="shader">
